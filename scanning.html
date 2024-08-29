@@ -212,7 +212,7 @@
                     showPrompt();
 
                     const data = { tool_id: code.data };
-                    fetch('http://127.0.0.1:5000/scanning', {
+                    fetch('https://masivintranet.onrender.com/scanning', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
