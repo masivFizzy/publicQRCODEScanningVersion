@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="mercedes-and-singh-15-2.png" alt="Logo">
+            </div>
+            <div class="title">Sign Up</div>
+        </div>
+    </header>
+    <main>
+        <form id="signup-form">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="login.html">Login</a></p>
+    </main>
+
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            fetch('http://127.0.0.1:5000/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = 'login.html';
+                } else {
+                    alert('Sign Up failed: ' + data.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

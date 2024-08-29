@@ -1,0 +1,265 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        #video {
+            width: 50%;
+            height: 70%;
+        }
+        #result {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+        #prompt {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="mercedes-and-singh-15-2.png" alt="Logo">
+            </div>
+            <div class="title">QR Code Scanner</div>
+            <div class="dropdown">
+                <button class="dropdown-btn">Menu</button>
+                <div class="dropdown-content">
+                    <a href="index.html">Home</a>
+                    <a href="scanning.html">Check-Out</a>
+                    <a href="#">Check In</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <h1>QR Code Scanner</h1>
+    <video id="video" autoplay></video>
+    <div id="result">Scanning...</div>
+    <div id="prompt">
+        <button id="scan-new">Scan New QR Code</button>
+        <button id="checkout">Continue to Checkout</button>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const result = document.getElementById('result');
+        const prompt = document.getElementById('prompt');
+        const scanNewButton = document.getElementById('scan-new');
+        const checkoutButton = document.getElementById('checkout');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const serverUrl = 'http://127.0.0.1:5000/scanning'; // Update to your Flask server URL
+        let scanning = true;
+
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(stream => {
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true);
+                video.play();
+                setInterval(sendFrame, 1000); // Send frames every second
+            })
+            .catch(err => {
+                console.error('Error accessing webcam:', err);
+                result.textContent = 'Error accessing webcam.';
+            });
+
+        function sendFrame() {
+            if (!scanning) return;
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width / 2, canvas.height / 2);
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('file', blob, 'frame.jpg');
+                fetch(serverUrl, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        result.textContent = data.error;
+                    } else {
+                        result.textContent = 'Tool Data: ' + JSON.stringify(data);
+                        localStorage.setItem("toolData", JSON.stringify(data));
+                        scanning = false;
+                        showPrompt();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending frame to server:', error);
+                });
+            }, 'image/jpeg');
+        }
+
+        function showPrompt() {
+            prompt.style.display = 'block';
+        }
+
+        scanNewButton.addEventListener('click', () => {
+            result.textContent = 'Scanning...';
+            prompt.style.display = 'none';
+            scanning = true;
+        });
+
+        checkoutButton.addEventListener('click', () => {
+            window.location.href = 'checkout.html'; // Replace with your checkout page URL
+        });
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        #video {
+            width: 50%;
+            height: 70%;
+        }
+        #result {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+        #prompt {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="mercedes-and-singh-15-2.png" alt="Logo">
+            </div>
+            <div class="title">QR Code Scanner</div>
+            <div class="dropdown">
+                <button class="dropdown-btn">Menu</button>
+                <div class="dropdown-content">
+                    <a href="index.html">Home</a>
+                    <a href="scanning.html">Check-Out</a>
+                    <a href="checkin.html">Check In</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <h1>QR Code Scanner</h1>
+    <video id="video" autoplay></video>
+    <div id="result">Scanning...</div>
+    <div id="prompt">
+        <button id="scan-new">Scan New QR Code</button>
+        <button id="checkout">Continue to Checkout</button>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const result = document.getElementById('result');
+        const prompt = document.getElementById('prompt');
+        const scanNewButton = document.getElementById('scan-new');
+        const checkoutButton = document.getElementById('checkout');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        let scanning = true;
+
+        // Start video stream
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(stream => {
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true);
+                video.play();
+                video.addEventListener('loadedmetadata', () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    requestAnimationFrame(scanQRCode); // Start scanning
+                });
+            })
+            .catch(err => {
+                console.error('Error accessing webcam:', err);
+                result.textContent = 'Error accessing webcam.';
+            });
+
+        // QR Code scanning function
+        function scanQRCode() {
+            if (!scanning) return;
+
+            // Ensure canvas dimensions match video dimensions
+            if (canvas.width === 0 || canvas.height === 0) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            }
+
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            try {
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+                if (code) {
+                    result.textContent = 'QR Code Data: ' + code.data;
+                    scanning = false;
+                    showPrompt();
+
+                    const data = { tool_id: code.data };
+                    fetch('http://127.0.0.1:5000/scanning', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errorData => {
+                                throw new Error(errorData.error || 'Unknown error occurred');
+                            });
+                        }
+                        return response.json(); // Parse JSON response
+                    })
+                    .then(data => {
+                        console.log('Success:', data);
+                        localStorage.setItem("toolData", JSON.stringify(data)); // Store tool data in localStorage
+                        alert('Tool Data: ' + JSON.stringify(data)); // Notify the user of success
+                    })
+                    .catch(error => {
+                        console.error('Error:', error.message);
+                        alert('Error: ' + error.message); // Notify the user of the error
+                    });
+                } else {
+                    result.textContent = 'Scanning...';
+                    requestAnimationFrame(scanQRCode); // Continue scanning
+                }
+            } catch (e) {
+                console.error('Error getting image data:', e);
+                requestAnimationFrame(scanQRCode); // Continue scanning on error
+            }
+        }
+
+        // Show the prompt when QR code is found
+        function showPrompt() {
+            prompt.style.display = 'block';
+        }
+
+        // Event listeners for buttons
+        scanNewButton.addEventListener('click', () => {
+            result.textContent = 'Scanning...';
+            prompt.style.display = 'none';
+            scanning = true;
+            requestAnimationFrame(scanQRCode); // Restart scanning
+        });
+
+        checkoutButton.addEventListener('click', () => {
+            window.location.href = 'checkout.html'; // Replace with your checkout page URL
+        });
+    </script>
+</body>
+</html>

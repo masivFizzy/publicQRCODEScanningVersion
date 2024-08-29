@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-In Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .tool-data {
+            margin: 20px 0;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .back-button {
+            background-color: #6c757d;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="mercedes-and-singh-15-2.png" alt="Logo">
+            </div>
+            <div class="title">Check-In Tool</div>
+            <div class="dropdown">
+                <button class="dropdown-btn">Menu</button>
+                <div class="dropdown-content">
+                    <a href="index.html">Home</a>
+                    <a href="scanning.html">Check-Out</a>
+                    <a href="checkin.html">Check-In</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Check-In Tool</h1>
+        <div class="tool-data" id="tool-data">
+            <!-- Tool data will be injected here by JavaScript -->
+        </div>
+        <a href="scanning.html" class="button back-button">Back to Scanning</a>
+        <button class="button" id="confirm-checkin">Confirm and Check-In</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Retrieve the JSON string from localStorage
+            const toolDataString = localStorage.getItem('toolData');
+            // Parse the JSON string back into a JavaScript object
+            const toolData = JSON.parse(toolDataString) || {
+                ToolAvailability: 'Unknown',
+                ToolCondition: 'Unknown',
+                ToolID: 'N/A',
+                ToolLocation: 'Unknown',
+                ToolName: 'Unknown Tool'
+            };
+
+            const toolDataDiv = document.getElementById('tool-data');
+            toolDataDiv.innerHTML = `
+                <h2>Tool Details</h2>
+                <p><strong>Name:</strong> ${toolData.ToolName}</p>
+                <p><strong>ID:</strong> ${toolData.ToolID}</p>
+                <p><strong>Condition:</strong> ${toolData.ToolCondition}</p>
+                <p><strong>Location:</strong> ${toolData.ToolLocation}</p>
+                <p><strong>Availability:</strong> ${toolData.ToolAvailability}</p>
+            `;
+
+            // Function to update tool availability
+            function updateToolAvailability(toolID) {
+                // URL of the endpoint
+                const url = 'http://127.0.0.1:5000/check-in-tool'; // Replace with your server URL
+
+                // Create the data object to be sent in the request
+                const data = {
+                    tool_id: toolID
+                };
+                console.log(data);
+                // Use fetch to send a PUT request
+                return fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data) // Convert the data object to a JSON string
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            // Handle non-200 responses
+                            return response.json().then(errorData => {
+                                throw new Error(errorData.error || 'Unknown error occurred');
+                            });
+                        }
+                        return response.json(); // Parse JSON response
+                    })
+                    .then(data => {
+                        // Handle successful response
+                        console.log('Success:', data.message);
+                        alert(data.message); // Notify the user of success
+                        return true;
+                    })
+                    .catch(error => {
+                        // Handle errors
+                        console.error('Error:', error.message);
+                        alert('Error: ' + error.message); // Notify the user of the error
+                        return false;
+                    });
+            }
+
+            // Event listener for the confirm button
+            document.getElementById('confirm-checkin').addEventListener('click', () => {
+                if (!toolData || !toolData.ToolID) {
+                    alert('No tool data available. Please scan a QR code again.');
+                    return;
+                }
+
+                updateToolAvailability(toolData.ToolID)
+                    .then(success => {
+                        if (success) {
+                            window.location.href = 'landing.html'; // Redirect to the desired URL
+                        }
+                    });
+            });
+        });
+    </script>
+</body>
+
+</html>
