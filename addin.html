@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adding</title>
+    <title>Adding Tool</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         .container {
@@ -47,18 +47,16 @@
             background-color: #5a6268;
         }
 
-        select {
+        select, input[type="text"] {
             width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-        }
-
-        input[type="text"] {
-            width: calc(100% - 22px);
             padding: 10px;
             margin: 5px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
+        }
+
+        select {
+            width: calc(100% - 22px);
         }
     </style>
 </head>
@@ -83,19 +81,19 @@
     </header>
 
     <div class="container">
-        <h1>Adding Tool</h1>
+        <h1>Add Tool</h1>
         <div class="tool-data" id="tool-data">
             <form id="tool-form">
                 <input type="text" id="tool-id" placeholder="ToolID" required />
                 <input type="text" id="tool-name" placeholder="ToolName" required />
                 <select id="tool-condition" required>
-                    <option value="" disabled selected>ToolCondition</option>
+                    <option value="" disabled selected>Tool Condition</option>
                     <option value="good">Good</option>
                     <option value="medium">Medium</option>
                     <option value="needs-repair">Needs Repair</option>
                 </select>
                 <select id="tool-location" required>
-                    <option value="" disabled selected>ToolLocation</option>
+                    <option value="" disabled selected>Tool Location</option>
                     <option value="shop">Shop</option>
                     <option value="storage">Storage</option>
                 </select>
@@ -104,6 +102,7 @@
         </div>
         <a href="scanning.html" class="button back-button">Back to Scanning</a>
         <button class="button" id="confirm-add">Add Tool</button>
+        <p id="feedback" style="text-align: center; margin-top: 20px; color: red;"></p>
     </div>
 
     <script>
@@ -115,7 +114,7 @@
             const toolAvailability = document.getElementById('tool-availability').value;
 
             if (!toolId || !toolName || !toolCondition || !toolLocation) {
-                alert('Please fill out all required fields.');
+                document.getElementById('feedback').textContent = 'Please fill out all required fields.';
                 return;
             }
 
@@ -137,14 +136,18 @@
                 });
 
                 if (response.ok) {
-                    alert('Tool added successfully!');
+                    const result = await response.json();
+                    document.getElementById('feedback').textContent = result.message || 'Tool added successfully!';
                     document.getElementById('tool-form').reset();
+                    console.log('Redirecting to landing.html');
+                    window.location.href = 'landing.html';
                 } else {
-                    alert('Failed to add tool.');
+                    const errorData = await response.json();
+                    document.getElementById('feedback').textContent = errorData.error || 'Failed to add tool.';
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while adding the tool.');
+                document.getElementById('feedback').textContent = 'An error occurred while adding the tool.';
             }
         });
     </script>
