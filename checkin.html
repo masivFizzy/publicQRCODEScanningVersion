@@ -100,13 +100,14 @@
             `;
 
             // Function to update tool availability
-            function updateToolAvailability(toolID) {
+            function updateToolAvailability(toolID, toolHolder) {
                 // URL of the endpoint
                 const url = 'https://masivintranet.onrender.com/check-in-tool'; // Replace with your server URL
 
                 // Create the data object to be sent in the request
                 const data = {
-                    tool_id: toolID
+                    tool_id: toolID,
+                    tool_holder: toolHolder
                 };
                 console.log(data);
                 // Use fetch to send a PUT request
@@ -146,13 +147,16 @@
                     alert('No tool data available. Please scan a QR code again.');
                     return;
                 }
-
-                updateToolAvailability(toolData.ToolID)
+                const toolHolder = prompt('Enter the name of the person checking out the tool:');
+                if(toolHolder){
+                    updateToolAvailability(toolData.ToolID, toolHolder)
                     .then(success => {
                         if (success) {
                             window.location.href = 'landing.html'; // Redirect to the desired URL
                         }
                     });
+                }
+                
             });
         });
     </script>
