@@ -110,18 +110,19 @@
                         body: JSON.stringify({ tool_id: toolID, tool_holder: toolHolder })
                     });
 
+                    const result = await response.json();
+
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Unknown error occurred');
+                        throw new Error(result.error || 'Unknown error occurred');
                     }
 
-                    const data = await response.json();
-                    console.log('Success:', data.message);
-                    alert(data.message); // Notify the user of success
+                    console.log('Success:', result.message);
+                    alert(result.message); // Notify the user of success
                     return true; // Indicate success
                 } catch (error) {
                     console.error('Error:', error.message);
                     alert('Error: ' + error.message); // Notify the user of the error
+                    localStorage.removeItem('toolData');
                     return false; // Indicate failure
                 }
             }
