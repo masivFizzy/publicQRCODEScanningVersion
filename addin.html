@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adding</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .tool-data {
+            margin: 20px 0;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .back-button {
+            background-color: #6c757d;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="mercedes-and-singh-15-2.png" alt="Logo">
+            </div>
+            <div class="title">Checkout</div>
+            <div class="dropdown">
+                <button class="dropdown-btn">Menu</button>
+                <div class="dropdown-content">
+                    <a href="index.html">Home</a>
+                    <a href="scanning.html">Check-Out</a>
+                    <a href="checkin.html">Check In</a>
+                    <a href="addin.html">Add Tool</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Adding Tool</h1>
+        <div class="tool-data" id="tool-data">
+            <form id="tool-form">
+                <input type="text" id="tool-id" placeholder="ToolID" required />
+                <input type="text" id="tool-name" placeholder="ToolName" required />
+                <select id="tool-condition" required>
+                    <option value="" disabled selected>ToolCondition</option>
+                    <option value="good">Good</option>
+                    <option value="medium">Medium</option>
+                    <option value="needs-repair">Needs Repair</option>
+                </select>
+                <select id="tool-location" required>
+                    <option value="" disabled selected>ToolLocation</option>
+                    <option value="shop">Shop</option>
+                    <option value="storage">Storage</option>
+                </select>
+                <input type="text" id="tool-availability" value="Open" readonly />
+            </form>
+        </div>
+        <a href="scanning.html" class="button back-button">Back to Scanning</a>
+        <button class="button" id="confirm-add">Add Tool</button>
+    </div>
+
+    <script>
+        document.getElementById('confirm-add').addEventListener('click', async () => {
+            const toolId = document.getElementById('tool-id').value;
+            const toolName = document.getElementById('tool-name').value;
+            const toolCondition = document.getElementById('tool-condition').value;
+            const toolLocation = document.getElementById('tool-location').value;
+            const toolAvailability = document.getElementById('tool-availability').value;
+
+            if (!toolId || !toolName || !toolCondition || !toolLocation) {
+                alert('Please fill out all required fields.');
+                return;
+            }
+
+            const toolData = {
+                tool_id: toolId,
+                tool_name: toolName,
+                tool_condition: toolCondition,
+                tool_location: toolLocation,
+                tool_availability: toolAvailability
+            };
+
+            try {
+                const response = await fetch('https://masivintranet.onrender.com/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(toolData)
+                });
+
+                if (response.ok) {
+                    alert('Tool added successfully!');
+                    document.getElementById('tool-form').reset();
+                } else {
+                    alert('Failed to add tool.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while adding the tool.');
+            }
+        });
+    </script>
+</body>
+
+</html>
