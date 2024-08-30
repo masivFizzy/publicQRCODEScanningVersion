@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        #video {
+            width: 50%;
+            height: 70%;
+        }
+        #result {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="mercedes-and-singh-15-2.png" alt="Logo">
+            </div>
+            <div class="title">QR Code Scanner</div>
+            <div class="dropdown">
+                <button class="dropdown-btn">Menu</button>
+                <div class="dropdown-content">
+                    <a href="index.html">Home</a>
+                    <a href="scanning.html">Check-Out</a>
+                    <a href="scan-in.html">Check-In</a>
+                    <a href="addin.html">Add Tool</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <h1>QR Code Scanner</h1>
+    <video id="video" autoplay></video>
+    <div id="result">Scanning...</div>
+
+    <script>
+        const video = document.getElementById('video');
+        const result = document.getElementById('result');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        let scanning = true;
+
+        // Start video stream
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(stream => {
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true);
+                video.play();
+                video.addEventListener('loadedmetadata', () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    requestAnimationFrame(scanQRCode); // Start scanning
+                });
+            })
+            .catch(err => {
+                console.error('Error accessing webcam:', err);
+                result.textContent = 'Error accessing webcam.';
+            });
+
+        // QR Code scanning function
+        function scanQRCode() {
+            if (!scanning) return;
+
+            // Ensure canvas dimensions match video dimensions
+            if (canvas.width === 0 || canvas.height === 0) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            }
+
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            try {
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+                if (code) {
+                    result.textContent = 'QR Code Data: ' + code.data;
+                    scanning = false;
+
+                    const data = { tool_id: code.data };
+                    fetch('https://masivintranet.onrender.com/scanning', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Success:', data);
+                        localStorage.setItem("toolData", JSON.stringify(data)); // Store tool data in localStorage
+                        window.location.href = 'checkin.html'; // Redirect to the check-in page
+                    })
+                    .catch(error => {
+                        console.error('Error:', error.message);
+                        alert('Error: ' + error.message); // Notify the user of the error
+                        scanning = true; // Resume scanning if there's an error
+                        requestAnimationFrame(scanQRCode); // Continue scanning
+                    });
+                } else {
+                    result.textContent = 'Scanning...';
+                    requestAnimationFrame(scanQRCode); // Continue scanning
+                }
+            } catch (e) {
+                console.error('Error getting image data:', e);
+                requestAnimationFrame(scanQRCode); // Continue scanning on error
+            }
+        }
+    </script>
+</body>
+</html>

@@ -60,7 +60,7 @@
                 <div class="dropdown-content">
                     <a href="index.html">Home</a>
                     <a href="scanning.html">Check-Out</a>
-                    <a href="checkin.html">Check In</a>
+                    <a href="scan-in.html">Check In</a>
                     <a href="addin.html">Add Tool</a>
                 </div>
             </div>
@@ -113,17 +113,22 @@
                     const result = await response.json();
 
                     if (!response.ok) {
-                        throw new Error(result.error || 'Unknown error occurred');
+                        if (result.error.includes("already checked out") || result.error.includes("needs repair")) {
+                            // Redirect with error message
+                            window.location.href = `landing.html?error=${encodeURIComponent(result.error)}`;
+                        } else {
+                            throw new Error(result.error || 'Unknown error occurred');
+                        }
                     }
 
                     console.log('Success:', result.message);
                     alert(result.message); // Notify the user of success
-                    return true; // Indicate success
+                    window.location.href = 'landing.html'; // Redirect to the landing page
+
                 } catch (error) {
                     console.error('Error:', error.message);
-                    alert('Error: ' + error.message); // Notify the user of the error
-                    localStorage.removeItem('toolData');
-                    return false; // Indicate failure
+                    // Redirect with a generic error message
+                    window.location.href = `landing.html?error=${encodeURIComponent('Error: ' + error.message)}`;
                 }
             }
 
@@ -136,10 +141,13 @@
 
                 const toolHolder = prompt('Enter the name of the person checking out the tool:');
                 if (toolHolder) {
-                    const success = await updateToolAvailability(toolData.ToolID, toolHolder);
-                    if (success) {
-                        console.log('Redirecting to landing.html');
-                        window.location.href = 'landing.html'; // Redirect to the desired URL
+                    // Ensure toolHolder is sanitized
+                    const sanitizedToolHolder = toolHolder.trim();
+
+                    if (sanitizedToolHolder) {
+                        await updateToolAvailability(toolData.ToolID, sanitizedToolHolder);
+                    } else {
+                        alert('Tool holder name is required.');
                     }
                 } else {
                     alert('Tool holder name is required.');
