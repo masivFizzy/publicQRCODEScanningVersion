@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MASIV Intranet</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="mercedes-and-singh-15-2.png" alt="Logo">
+            </div>
+            <div class="title">MASIV INTRANET</div>
+            <div class="dropdown">
+                <button class="dropdown-btn">Menu</button>
+                <div class="dropdown-content">
+                    <a href="index.html">Home</a>
+                    <a href="scanning.html">Check-Out</a>
+                    <a href="scan-in.html">Check-In</a>
+                    <a href="addin.html">Add Tool</a>
+                    <a href="tutorial.html">Tutorial Video</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div id="documents-container">
+        <h2>Workplace Tutorial Video</h2>
+        <div id="video-list">Loading videos...</div>
+    </div>
+
+    <script>
+        // Fetch and display documents
+        fetch('https://masivintranet.onrender.com/tutorial')
+            .then(response => response.json())
+            .then(data => {
+                const documentsList = document.getElementById('video-list');
+                documentsList.innerHTML = '';
+                console.log(data)
+                if (data.videos && data.videos.length > 0) {
+                    data.videos.forEach(video => {
+                        const videoItem = document.createElement('div');
+                        videoItem.classList.add('video-item');
+
+                        const videoName = document.createElement('p');
+                        videoName.classList.add('video-name');
+                        videoName.textContent = video.name;
+
+                        const videoElement = document.createElement('video');
+                        videoElement.src = video.url;
+                        videoElement.controls = true;
+
+                        videoItem.appendChild(videoElement);
+                        videoItem.appendChild(videoName);
+                        documentsList.appendChild(videoItem);
+                    });
+                } else {
+                    documentsList.innerHTML = 'No videos available.';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching videos:', error);
+                document.getElementById('documents-list').innerHTML = 'Error loading videos.';
+            });
+    </script>
+</body>
+</html>

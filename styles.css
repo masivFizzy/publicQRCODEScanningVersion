@@ -124,18 +124,32 @@ video {
     display: none;
 }
 
-#documents-container {
+#tools-container {
     padding: 20px;
 }
 
-.document {
+.tool {
     border: 1px solid #ddd;
     padding: 10px;
     margin-bottom: 10px;
     background-color: #f9f9f9;
     white-space: pre-wrap; /* Preserve formatting */
 }
+.tool:hover{
+    background-color: #ff5722;
+    color: white;
+}
 
-#documents-list {
+#tool-list {
     font-family: monospace;
+}
+
+#video-list {
+    display: grid;
+    grid-template-columns: auto auto auto;
+}
+
+.video-item video{
+    height:auto;
+    width: 30%;
 }
