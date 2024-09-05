@@ -4,23 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adding Tool</title>
+    <title>Adding Customer</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-        }
-
-        .tool-data {
-            margin: 20px 0;
-        }
-
         .button {
             display: inline-block;
             padding: 10px 20px;
@@ -85,27 +71,42 @@
     </header>
 
     <div class="container">
-        <h1>Add Tool</h1>
-        <div class="tool-data" id="tool-data">
-            <form id="tool-form">
-                <input type="text" id="tool-id" placeholder="ToolID" required />
-                <input type="text" id="tool-name" placeholder="ToolName" required />
-                <select id="tool-condition" required>
-                    <option value="" disabled selected>Tool Condition</option>
-                    <option value="good">Good</option>
-                    <option value="medium">Medium</option>
-                    <option value="needs-repair">Needs Repair</option>
-                </select>
-                <select id="tool-location" required>
-                    <option value="" disabled selected>Tool Location</option>
-                    <option value="shop">Shop</option>
-                    <option value="storage">Storage</option>
-                </select>
-                <input type="text" id="tool-availability" value="open" readonly />
+        <h1>Add Customer</h1>
+        <div class="cust-data" id="cust-data">
+            <form id="cust-form">
+                <input type="text" id="cust_first_name" placeholder="First Name" required />
+                <input type="text" id="cust_last_name" placeholder="Last Name" required />
+                <input type="text" id="cust_email" placeholder="Email" required />
+                <input type="text" id="cust_phone" placeholder="Phone" required />
+                <div class="company-container">
+                    <input type="text" id="cust_company" placeholder="Company" required />
+                    <span class="info-icon" title="If you do not have a company, select other">ℹ️</span>
+                </div>
+                <form id="businessDivisionForm">
+                    <fieldset>
+                        <legend>Select Business Divisions</legend>
+                        <label>
+                            <input type="checkbox" name="businessDivision" value="masiv">
+                            MASIV
+                        </label>
+                        <label>
+                            <input type="checkbox" name="businessDivision" value="masivx">
+                            MASIVX
+                        </label>
+                        <label>
+                            <input type="checkbox" name="businessDivision" value="h-o-m-e.ai">
+                            H-O-M-E.ai
+                        </label>
+                        <label>
+                            <input type="checkbox" name="businessDivision" value="mtharu">
+                            MTHARU
+                        </label>
+                    </fieldset>
+                </form>                
             </form>
         </div>
         <a href="scanning.html" class="button back-button">Back to Scanning</a>
-        <button class="button" id="confirm-add">Add Tool</button>
+        <button class="button" id="confirm-add">Add Customer</button>
         <p id="feedback" style="text-align: center; margin-top: 20px; color: red;"></p>
     </div>
 
@@ -126,49 +127,51 @@
                 window.location.href = 'index.html';
             }
         });
-        
         document.getElementById('confirm-add').addEventListener('click', async () => {
-            const toolId = document.getElementById('tool-id').value;
-            const toolName = document.getElementById('tool-name').value;
-            const toolCondition = document.getElementById('tool-condition').value;
-            const toolLocation = document.getElementById('tool-location').value;
-            const toolAvailability = document.getElementById('tool-availability').value;
-
-            if (!toolId || !toolName || !toolCondition || !toolLocation) {
+            const custFName = document.getElementById('cust_first_name').value;
+            const custLName = document.getElementById('cust_last_name').value;
+            const custEmail = document.getElementById('cust_email').value;
+            const custPhone = document.getElementById('cust_phone').value;
+            const custCompany = document.getElementById('cust_company').value;
+            const checkboxes = document.querySelectorAll('input[name="businessDivision"]:checked');
+            const businessDivision = Array.from(checkboxes).map(checkbox => checkbox.value);
+            console.log(businessDivision)
+            if (!custFName || !custLName || !custEmail || !custPhone || !custCompany || !businessDivision) {
                 document.getElementById('feedback').textContent = 'Please fill out all required fields.';
                 return;
             }
 
-            const toolData = {
-                tool_id: toolId,
-                tool_name: toolName,
-                tool_condition: toolCondition,
-                tool_location: toolLocation,
-                tool_availability: toolAvailability
+            const customerData = {
+                cust_first_name: custFName,
+                cust_last_name: custLName,
+                cust_email: custEmail,
+                cust_phone: custPhone,
+                cust_company: custCompany,
+                bus_div: businessDivision
             };
 
             try {
-                const response = await fetch('https://masivintranet.onrender.com/add', {
+                const response = await fetch('https://masivintranet.onrender.com/addCustomer', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(toolData)
+                    body: JSON.stringify(customerData)
                 });
 
                 if (response.ok) {
                     const result = await response.json();
-                    document.getElementById('feedback').textContent = result.message || 'Tool added successfully!';
-                    document.getElementById('tool-form').reset();
+                    document.getElementById('feedback').textContent = result.message || 'Customer added successfully!';
+                    document.getElementById('cust-form').reset();
                     console.log('Redirecting to landing.html');
                     window.location.href = 'landing.html';
                 } else {
                     const errorData = await response.json();
-                    document.getElementById('feedback').textContent = errorData.error || 'Failed to add tool.';
+                    document.getElementById('feedback').textContent = errorData.error || 'Failed to add customer.';
                 }
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('feedback').textContent = 'An error occurred while adding the tool.';
+                document.getElementById('feedback').textContent = 'An error occurred while adding the customer.';
             }
         });
     </script>

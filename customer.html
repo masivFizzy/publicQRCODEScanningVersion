@@ -29,15 +29,15 @@
             </div>
         </div>
     </header>
-    <div id="tools-container">
-        <h2>Tools Document</h2>
+    <div id="custs-container">
+        <h2>Customer Document</h2>
         <div class="search-container">
             <form id="search-form">
                 <input type="text" id="search-input" placeholder="Search.." name="search">
                 <button type="submit"><i class="fa fa-search"></i></button>
             </form>
         </div>        
-        <div id="tool-list">Loading documents...</div>
+        <div id="cust-list">Loading documents...</div>
     </div>
 
     <script>
@@ -57,15 +57,15 @@
                 window.location.href = 'index.html';
             }
         });
-        let toolDoc = []; 
+        let custDoc = []; 
     
         function renderDocuments(filteredDocs) {
-            const documentsList = document.getElementById('tool-list');
+            const documentsList = document.getElementById('cust-list');
             documentsList.innerHTML = '';
             if (filteredDocs.length > 0) {
                 filteredDocs.forEach(doc => {
                     const docElement = document.createElement('div');
-                    docElement.classList.add('tool');
+                    docElement.classList.add('cust');
                     docElement.innerHTML = JSON.stringify(doc, null, 2);
                     documentsList.appendChild(docElement);
                 });
@@ -74,21 +74,21 @@
             }
         }
 
-        fetch('https://masivintranet.onrender.com/documents')  
+        fetch('https://masivintranet.onrender.com/customer')  
             .then(response => response.json())
             .then(data => {
-                toolDoc = data; 
-                renderDocuments(toolDoc);
+                custDoc = data; 
+                renderDocuments(custDoc);
             })
             .catch(error => {
                 console.error('Error fetching documents:', error);
-                document.getElementById('tool-list').innerHTML = 'Error loading documents.';
+                document.getElementById('cust-list').innerHTML = 'Error loading documents.';
             });
     
         document.getElementById('search-form').addEventListener('submit', function(event) {
             event.preventDefault();
             const query = document.getElementById('search-input').value.toLowerCase();
-            const filteredDocs = toolDoc.filter(doc => {
+            const filteredDocs = custDoc.filter(doc => {
                 return JSON.stringify(doc).toLowerCase().includes(query);
             });
             renderDocuments(filteredDocs);
@@ -96,7 +96,7 @@
     
         document.getElementById('search-input').addEventListener('input', function() {
             const query = this.value.toLowerCase();
-            const filteredDocs = toolDoc.filter(doc => {
+            const filteredDocs = custDoc.filter(doc => {
                 return JSON.stringify(doc).toLowerCase().includes(query);
             });
             renderDocuments(filteredDocs);
