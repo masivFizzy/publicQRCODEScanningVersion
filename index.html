@@ -43,7 +43,11 @@
                     document.getElementById('feedback').textContent = 'Your session has expired. Please log in again.';
                     window.location.href = 'index.html';
                 }
+                else{
+                    window.location.href = 'landing.html';
+                }
             }
+
         });
         document.querySelector('.login-btn').addEventListener('click', async () => {
             try {

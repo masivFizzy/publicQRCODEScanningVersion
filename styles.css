@@ -12,7 +12,9 @@ body {
 }
 
 header {
-    background: linear-gradient(90deg, #ff5722, #e64a19);
+    /* background: linear-gradient(90deg, #ff5722, #e64a19);
+     */
+     background-color: #1a1a1a;
     color: #fff;
     width: 100%;
     padding: 10px 20px;
@@ -50,7 +52,7 @@ header {
     position: relative;
 }
 
-.dropdown-btn {
+.dropdown-btn,.login-btn {
     background-color: #e64a19;
     border: none;
     color: white;
@@ -124,18 +126,21 @@ video {
     display: none;
 }
 
-#tools-container {
+#tools-container,
+#custs-container {
     padding: 20px;
 }
 
-.tool {
+.tool,
+.cust {
     border: 1px solid #ddd;
     padding: 10px;
     margin-bottom: 10px;
     background-color: #f9f9f9;
     white-space: pre-wrap; /* Preserve formatting */
 }
-.tool:hover{
+.tool:hover,
+.cust:hover{
     background-color: #ff5722;
     color: white;
 }
@@ -144,12 +149,31 @@ video {
     font-family: monospace;
 }
 
-#video-list {
+#video-list,
+#cust-list {
     display: grid;
+    column-gap: 10px;
     grid-template-columns: auto auto auto;
 }
 
 .video-item video{
     height:auto;
     width: 30%;
+}
+
+.company-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.info-icon {
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 16px; /* Adjust size as needed */
+    color: #007bff; /* Optional: adjust color to match your design */
+}
+
+.info-icon:hover {
+    color: #0056b3; /* Optional: change color on hover */
 }
