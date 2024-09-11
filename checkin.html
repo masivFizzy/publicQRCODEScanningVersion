@@ -45,6 +45,23 @@
         .back-button:hover {
             background-color: #5a6268;
         }
+
+        #video {
+            width: 100%;
+            height: auto;
+            display: none;
+        }
+
+        #photo {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+
+        .photo-controls {
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -76,6 +93,42 @@
         <div class="tool-data" id="tool-data">
             <!-- Tool data will be injected here by JavaScript -->
         </div>
+        <div class="form-group">
+            <label for="tool-location">Select Tool Location:</label>
+            <select id="tool-location" required>
+                <option value="" disabled selected>Tool Location</option>
+                <option value="shop-hangingshelf">Shop - Hanging Shelf</option>
+                <option value="shop-middletable">Shop - Middle Table</option>
+                <option value="shop-outside">Shop - Outside</option>
+                <option value="storage-left-front-shelf1">Storage - Left Front Shelf 1</option>
+                <option value="storage-left-middle-shelf1">Storage - Left Middle Shelf 1</option>
+                <option value="storage-left-rare-shelf1">Storage - Left Rare Shelf 1</option>
+                <option value="storage-left-front-shelf2">Storage - Left Front Shelf 2</option>
+                <option value="storage-left-middle-shelf2">Storage - Left Middle Shelf 2</option>
+                <option value="storage-left-rare-shelf2">Storage - Left Rare Shelf 2</option>
+                <option value="storage-left-front-shelf3">Storage - Left Front Shelf 3</option>
+                <option value="storage-left-middle-shelf3">Storage - Left Middle Shelf 3</option>
+                <option value="storage-left-rare-shelf3">Storage - Left Rare Shelf 3</option>
+                <option value="storage-right-front-shelf1">Storage - Right Front Shelf 1</option>
+                <option value="storage-right-middle-shelf1">Storage - Right Middle Shelf 1</option>
+                <option value="storage-right-rare-shelf1">Storage - Right Rare Shelf 1</option>
+                <option value="storage-right-front-shelf2">Storage - Right Front Shelf 2</option>
+                <option value="storage-right-middle-shelf2">Storage - Right Middle Shelf 2</option>
+                <option value="storage-right-rare-shelf2">Storage - Right Rare Shelf 2</option>
+                <option value="storage-right-front-shelf3">Storage - Right Front Shelf 3</option>
+                <option value="storage-right-middle-shelf3">Storage - Right Middle Shelf 3</option>
+                <option value="storage-right-rare-shelf3">Storage - Right Rare Shelf 3</option>
+            </select>
+        </div>
+
+        <!-- Camera section -->
+        <div class="photo-controls">
+            <button class="button" id="start-camera">Take Photo</button>
+            <button class="button" id="capture" style="display:none;">Capture Photo</button>
+            <video id="video"></video>
+            <img id="photo" alt="Photo Preview">
+        </div>
+
         <a href="scan-in.html" class="button back-button">Back to Scanning</a>
         <button class="button" id="confirm-checkin">Confirm and Check-In</button>
     </div>
@@ -87,20 +140,15 @@
                 const expiryTime = new Date(tokenExpiryDate).getTime();
                 const currentTime = new Date().getTime();
                 if (currentTime > expiryTime) {
-                    // Clear local storage if the token is expired
                     localStorage.clear();
                     alert('Your session has expired. Please log in again.');
                     window.location.href = 'index.html';
                 }
             } else {
-                // Redirect if no token expiry date is found
                 window.location.href = 'index.html';
             }
-        });
-        document.addEventListener('DOMContentLoaded', () => {
-            // Retrieve the JSON string from localStorage
+
             const toolDataString = localStorage.getItem('toolData');
-            // Parse the JSON string back into a JavaScript object
             const toolData = JSON.parse(toolDataString) || {
                 ToolAvailability: 'Unknown',
                 ToolCondition: 'Unknown',
@@ -119,74 +167,127 @@
                 <p><strong>Availability:</strong> ${toolData.ToolAvailability}</p>
             `;
 
-            // Function to update tool availability
-            function updateToolAvailability(toolID, toolHolder, toolCondition) {
-                // URL of the endpoint
-                const url = 'https://masivintranet.onrender.com/check-in-tool'; // Replace with your server URL
-
-                // Create the data object to be sent in the request
+            function updateToolAvailability(toolID, toolHolder, toolCondition, toolLocation, photoData) {
+                const url = 'https://masivintranet.onrender.com/check-in-tool';
                 const data = {
+                    access_token: localStorage.getItem('access_token'),
                     tool_id: toolID,
                     tool_holder: toolHolder,
-                    tool_condition: toolCondition
+                    tool_condition: toolCondition,
+                    tool_location: toolLocation,
+                    photo: photoData
                 };
                 console.log(data);
-                // Use fetch to send a PUT request
                 return fetch(url, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(data) // Convert the data object to a JSON string
+                    body: JSON.stringify(data)
                 })
                     .then(response => {
                         if (!response.ok) {
-                            // Handle non-200 responses
                             return response.json().then(errorData => {
                                 throw new Error(errorData.error || 'Unknown error occurred');
                             });
                         }
-                        return response.json(); // Parse JSON response
+                        return response.json();
                     })
                     .then(data => {
-                        // Handle successful response
                         console.log('Success:', data.message);
-                        alert(data.message); // Notify the user of success
+                        alert(data.message);
                         return true;
                     })
                     .catch(error => {
-                        // Handle errors
                         console.error('Error:', error.message);
-                        alert('Error: ' + error.message); // Notify the user of the error
+                        alert('Error: ' + error.message);
                         return false;
                     });
             }
 
-            // Event listener for the confirm button
+            const video = document.getElementById('video');
+    const photo = document.getElementById('photo');
+    const startCameraButton = document.getElementById('start-camera');
+    const captureButton = document.getElementById('capture');
+
+    startCameraButton.addEventListener('click', () => {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    startCameraButton.style.display = 'none';
+                    captureButton.style.display = 'inline-block';
+                })
+                .catch(err => {
+                    console.error('Error accessing camera: ', err);
+                    alert('Error accessing camera: ' + err.message);
+                });
+        } else {
+            alert('Camera not supported on this device.');
+        }
+    });
+
+    captureButton.addEventListener('click', () => {
+        if (video.srcObject) {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            photo.src = canvas.toDataURL('image/png');
+            photo.style.display = 'block';
+            video.style.display = 'none';
+            captureButton.style.display = 'none';
+            startCameraButton.style.display = 'inline-block';
+
+            // Get photo data URL for further processing
+            const photoData = canvas.toDataURL('image/png');
+
+            // Store photo data URL in localStorage for later use
+            localStorage.setItem('photoData', photoData);
+        } else {
+            alert('No video stream found. Please start the camera first.');
+        }
+    });
+
             document.getElementById('confirm-checkin').addEventListener('click', () => {
                 if (!toolData || !toolData.ToolID) {
                     alert('No tool data available. Please scan a QR code again.');
                     return;
                 }
-                
-                // Prompt user for tool holder name
+
+                const toolLocation = document.getElementById('tool-location').value;
+                if (!toolLocation) {
+                    alert('Please select the tool location.');
+                    return;
+                }
+
+                if (toolLocation !== toolData.ToolLocation) {
+                    alert('Selected location does not match the tool\'s location. Please check the location and try again.');
+                    return;
+                }
+
                 const toolHolder = prompt('Enter the name of the person checking in the tool:');
                 if (!toolHolder) {
                     alert('Tool holder name is required.');
                     return;
                 }
 
-                // Prompt user for tool condition
                 const toolCondition = prompt('Enter the condition of the tool (good, medium, needs-repair):');
                 if (!toolCondition || !['good', 'medium', 'needs-repair'].includes(toolCondition)) {
                     alert('Valid tool condition is required.');
                     return;
                 }
 
-                updateToolAvailability(toolData.ToolID, toolHolder, toolCondition)
+                // Retrieve photo data URL from localStorage
+                const photoData = localStorage.getItem('photoData');
+
+                updateToolAvailability(toolData.ToolID, toolHolder, toolCondition, toolLocation, photoData)
                     .then(success => {
                         if (success) {
-                            window.location.href = 'landing.html'; // Redirect to the desired URL
+                            localStorage.removeItem('photoData'); // Clear photo data after successful check-in
+                            window.location.href = 'landing.html';
                         }
                     });
             });

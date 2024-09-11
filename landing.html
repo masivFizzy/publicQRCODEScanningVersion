@@ -6,6 +6,33 @@
     <title>MASIV Intranet</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <style>
+        .tool-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .tool-table th, .tool-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .tool-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .tool-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .tool-table tbody tr:hover {
+            color: rgb(34, 63, 178);
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -36,8 +63,19 @@
                 <input type="text" id="search-input" placeholder="Search.." name="search">
                 <button type="submit"><i class="fa fa-search"></i></button>
             </form>
-        </div>        
-        <div id="tool-list">Loading documents...</div>
+        </div>
+        <div id="tool-list">
+            <!-- Create table -->
+            <table id="tool-table" class="tool-table">
+                <thead>
+                    <!-- Table headers will be added here by JavaScript -->
+                </thead>
+                <tbody>
+                    <!-- Table rows will be added here by JavaScript -->
+                </tbody>
+            </table>
+            <div id="table-container" style="display: none;">Loading documents...</div>
+        </div>
     </div>
 
     <script>
@@ -57,49 +95,81 @@
                 window.location.href = 'index.html';
             }
         });
+
         let toolDoc = []; 
-    
-        function renderDocuments(filteredDocs) {
-            const documentsList = document.getElementById('tool-list');
-            documentsList.innerHTML = '';
-            if (filteredDocs.length > 0) {
-                filteredDocs.forEach(doc => {
-                    const docElement = document.createElement('div');
-                    docElement.classList.add('tool');
-                    docElement.innerHTML = JSON.stringify(doc, null, 2);
-                    documentsList.appendChild(docElement);
+
+        function renderTable(headers, data) {
+            const toolTable = document.getElementById('tool-table');
+            const thead = toolTable.querySelector('thead');
+            const tbody = toolTable.querySelector('tbody');
+
+            // Clear previous content
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            // Create header
+            const headerRow = document.createElement('tr');
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+
+            // Create body
+            data.forEach(doc => {
+                const valueRow = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = doc[header] || 'N/A'; // Use 'N/A' if the key is missing
+                    valueRow.appendChild(td);
                 });
-            } else {
-                documentsList.innerHTML = 'No documents found.';
-            }
+                tbody.appendChild(valueRow);
+            });
         }
 
-        fetch('https://masivintranet.onrender.com/documents')  
+        fetch('https://masivintranet.onrender.com/documents', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ access_token: localStorage.getItem('access_token') })
+        })  
             .then(response => response.json())
             .then(data => {
                 toolDoc = data; 
-                renderDocuments(toolDoc);
+
+                // Define the headers
+                const headers = ["ToolID", "ToolName", "ToolCondition", "ToolLocation", "ToolAvailability"];
+
+                // Render the table
+                renderTable(headers, toolDoc);
+
+                // Hide the loading message
+                document.getElementById('table-container').style.display = 'none';
             })
             .catch(error => {
                 console.error('Error fetching documents:', error);
-                document.getElementById('tool-list').innerHTML = 'Error loading documents.';
+                document.getElementById('table-container').innerHTML = 'Error loading documents.';
             });
-    
+
         document.getElementById('search-form').addEventListener('submit', function(event) {
             event.preventDefault();
             const query = document.getElementById('search-input').value.toLowerCase();
             const filteredDocs = toolDoc.filter(doc => {
                 return JSON.stringify(doc).toLowerCase().includes(query);
             });
-            renderDocuments(filteredDocs);
+            const headers = ["ToolID", "ToolName", "ToolCondition", "ToolLocation", "ToolAvailability"];
+            renderTable(headers, filteredDocs);
         });
-    
+
         document.getElementById('search-input').addEventListener('input', function() {
             const query = this.value.toLowerCase();
             const filteredDocs = toolDoc.filter(doc => {
                 return JSON.stringify(doc).toLowerCase().includes(query);
             });
-            renderDocuments(filteredDocs);
+            const headers = ["ToolID", "ToolName", "ToolCondition", "ToolLocation", "ToolAvailability"];
+            renderTable(headers, filteredDocs);
         });
     </script>    
 </body>

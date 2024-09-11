@@ -127,7 +127,7 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ tool_id: toolID, tool_holder: toolHolder })
+                        body: JSON.stringify({ access_token: localStorage.getItem('access_token'), tool_id: toolID, tool_holder: toolHolder })
                     });
 
                     const result = await response.json();

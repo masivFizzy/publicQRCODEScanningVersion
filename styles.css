@@ -131,20 +131,6 @@ video {
     padding: 20px;
 }
 
-.tool,
-.cust {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #f9f9f9;
-    white-space: pre-wrap; /* Preserve formatting */
-}
-.tool:hover,
-.cust:hover{
-    background-color: #ff5722;
-    color: white;
-}
-
 #tool-list {
     font-family: monospace;
 }

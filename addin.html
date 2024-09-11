@@ -98,8 +98,27 @@
                 </select>
                 <select id="tool-location" required>
                     <option value="" disabled selected>Tool Location</option>
-                    <option value="shop">Shop</option>
-                    <option value="storage">Storage</option>
+                    <option value="shop-hangingshelf">Shop - Hanging Shelf</option>
+                    <option value="shop-middletable">Shop - Middle Table</option>
+                    <option value="shop-outside">Shop - Outside</option>
+                    <option value="storage-left-front-shelf1">Storage - Left Front Shelf 1</option>
+                    <option value="storage-left-middle-shelf1">Storage - Left Middle Shelf 1</option>
+                    <option value="storage-left-rare-shelf1">Storage - Left Rare Shelf 1</option>
+                    <option value="storage-left-front-shelf2">Storage - Left Front Shelf 2</option>
+                    <option value="storage-left-middle-shelf2">Storage - Left Middle Shelf 2</option>
+                    <option value="storage-left-rare-shelf2">Storage - Left Rare Shelf 2</option>
+                    <option value="storage-left-front-shelf3">Storage - Left Front Shelf 3</option>
+                    <option value="storage-left-middle-shelf3">Storage - Left Middle Shelf 3</option>
+                    <option value="storage-left-rare-shelf3">Storage - Left Rare Shelf 3</option>
+                    <option value="storage-right-front-shelf1">Storage - Right Front Shelf 1</option>
+                    <option value="storage-right-middle-shelf1">Storage - Right Middle Shelf 1</option>
+                    <option value="storage-right-rare-shelf1">Storage - Right Rare Shelf 1</option>
+                    <option value="storage-right-front-shelf2">Storage - Right Front Shelf 2</option>
+                    <option value="storage-right-middle-shelf2">Storage - Right Middle Shelf 2</option>
+                    <option value="storage-right-rare-shelf2">Storage - Right Rare Shelf 2</option>
+                    <option value="storage-right-front-shelf3">Storage - Right Front Shelf 3</option>
+                    <option value="storage-right-middle-shelf3">Storage - Right Middle Shelf 3</option>
+                    <option value="storage-right-rare-shelf3">Storage - Right Rare Shelf 3</option>
                 </select>
                 <input type="text" id="tool-availability" value="open" readonly />
             </form>
@@ -140,6 +159,7 @@
             }
 
             const toolData = {
+                access_token: localStorage.getItem('access_token'),
                 tool_id: toolId,
                 tool_name: toolName,
                 tool_condition: toolCondition,

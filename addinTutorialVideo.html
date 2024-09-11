@@ -121,6 +121,7 @@
             }
 
             const formData = new FormData();
+            formData.append('access_token', localStorage.getItem('access_token'),)
             formData.append('video_name', videoName);
             formData.append('video_file', videoFile);
 

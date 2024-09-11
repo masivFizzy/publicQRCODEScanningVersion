@@ -51,7 +51,13 @@
             }
         });
         // Fetch and display documents
-        fetch('https://masivintranet.onrender.com/tutorial')
+        fetch('https://masivintranet.onrender.com/tutorial', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ access_token: localStorage.getItem('access_token') })
+        })
             .then(response => response.json())
             .then(data => {
                 const documentsList = document.getElementById('video-list');

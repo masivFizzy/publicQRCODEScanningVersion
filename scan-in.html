@@ -103,7 +103,7 @@
                     result.textContent = 'QR Code Data: ' + code.data;
                     scanning = false;
 
-                    const data = { tool_id: code.data };
+                    const data = { tool_id: code.data, access_token: localStorage.getItem('access_token'), };
                     fetch('https://masivintranet.onrender.com/scanning', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
