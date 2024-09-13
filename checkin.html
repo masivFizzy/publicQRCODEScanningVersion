@@ -7,6 +7,21 @@
     <title>Check-In Tool</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        #video {
+            width: 50%;
+            height: 70%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #photo {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+            display: none; /* Initially hidden */
+        }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -44,23 +59,6 @@
 
         .back-button:hover {
             background-color: #5a6268;
-        }
-
-        #video {
-            width: 100%;
-            height: auto;
-            display: none;
-        }
-
-        #photo {
-            display: block;
-            max-width: 100%;
-            height: auto;
-            margin: 10px 0;
-        }
-
-        .photo-controls {
-            text-align: center;
         }
     </style>
 </head>
@@ -122,13 +120,10 @@
         </div>
 
         <!-- Camera section -->
-        <div class="photo-controls">
-            <button class="button" id="start-camera">Take Photo</button>
-            <button class="button" id="capture" style="display:none;">Capture Photo</button>
-            <video id="video"></video>
-            <img id="photo" alt="Photo Preview">
-        </div>
-
+        <video id="video" autoplay></video>
+        <canvas id="canvas" style="display:none;"></canvas>
+        <img id="photo" alt="Captured Photo">
+        <button class="button" id="capture-photo">Capture Photo</button>
         <a href="scan-in.html" class="button back-button">Back to Scanning</a>
         <button class="button" id="confirm-checkin">Confirm and Check-In</button>
     </div>
@@ -175,7 +170,7 @@
                     tool_holder: toolHolder,
                     tool_condition: toolCondition,
                     tool_location: toolLocation,
-                    photo: photoData
+                    check_in_photo: photoData
                 };
                 console.log(data);
                 return fetch(url, {
@@ -206,52 +201,36 @@
             }
 
             const video = document.getElementById('video');
-    const photo = document.getElementById('photo');
-    const startCameraButton = document.getElementById('start-camera');
-    const captureButton = document.getElementById('capture');
+            const canvas = document.getElementById('canvas');
+            const photo = document.getElementById('photo');
 
-    startCameraButton.addEventListener('click', () => {
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: true })
+            // Start video stream
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                 .then(stream => {
                     video.srcObject = stream;
-                    video.style.display = 'block';
-                    startCameraButton.style.display = 'none';
-                    captureButton.style.display = 'inline-block';
+                    video.setAttribute('playsinline', true);
+                    video.play();
                 })
                 .catch(err => {
-                    console.error('Error accessing camera: ', err);
-                    alert('Error accessing camera: ' + err.message);
+                    console.error('Error accessing webcam:', err);
+                    alert('Error accessing webcam.');
                 });
-        } else {
-            alert('Camera not supported on this device.');
-        }
-    });
 
-    captureButton.addEventListener('click', () => {
-        if (video.srcObject) {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const context = canvas.getContext('2d');
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            photo.src = canvas.toDataURL('image/png');
-            photo.style.display = 'block';
-            video.style.display = 'none';
-            captureButton.style.display = 'none';
-            startCameraButton.style.display = 'inline-block';
-
-            // Get photo data URL for further processing
-            const photoData = canvas.toDataURL('image/png');
-
-            // Store photo data URL in localStorage for later use
-            localStorage.setItem('photoData', photoData);
-        } else {
-            alert('No video stream found. Please start the camera first.');
-        }
-    });
+            document.getElementById('capture-photo').addEventListener('click', () => {
+                const context = canvas.getContext('2d');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const photoData = canvas.toDataURL('image/png');
+                photo.src = photoData;
+                photo.style.display = 'block'; // Show the captured photo
+                localStorage.setItem('photoData', photoData); // Save photo data to local storage
+            });
 
             document.getElementById('confirm-checkin').addEventListener('click', () => {
+                // Retrieve photo data URL from localStorage
+                const photoData = localStorage.getItem('photoData');
+
                 if (!toolData || !toolData.ToolID) {
                     alert('No tool data available. Please scan a QR code again.');
                     return;
@@ -268,6 +247,11 @@
                     return;
                 }
 
+                if (!photoData) {
+                    alert('Please capture a photo.');
+                    return;
+                }
+
                 const toolHolder = prompt('Enter the name of the person checking in the tool:');
                 if (!toolHolder) {
                     alert('Tool holder name is required.');
@@ -279,9 +263,6 @@
                     alert('Valid tool condition is required.');
                     return;
                 }
-
-                // Retrieve photo data URL from localStorage
-                const photoData = localStorage.getItem('photoData');
 
                 updateToolAvailability(toolData.ToolID, toolHolder, toolCondition, toolLocation, photoData)
                     .then(success => {
