@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="mercedes-and-singh-15-2.png" alt="Logo">
+            </div>
+            <div class="title">MASIV INTRANET</div>
+            <div>
+                <div class="dropdown">
+                    <button class="dropdown-btn">Menu</button>
+                    <div class="dropdown-content">
+                        <a href="home.html">Home</a>
+                        <a href="scanout.html">Check-Out</a>
+                        <a href="scanin.html">Check-In</a>
+                        <a href="tutorial.html">Tutorial Video</a>
+                    </div>
+                </div>
+                <button id="auth-btn" title="Admin Access">Login</button>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <h1>QR Code Scanner</h1>
+        <video id="video" autoplay></video>
+        <div id="result">Scanning...</div>
+        <div id="prompt" style="display:none;">
+            <button id="scan-new" class="button">Scan New QR Code</button>
+            <button id="checkout" class="button">Continue to Checkout</button>
+        </div>
+    </div>
+
+    <script>
+        // Handle authentication (login/logout)
+        function handleAuth() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('username');
+                localStorage.removeItem('access_token');
+                updateAuthButton();
+                window.location.href = 'index.html'; // Redirect to login page
+            } else {
+                window.location.href = 'index.html'; // Redirect to login page
+            }
+        }
+
+        // Update the authentication button text based on login status
+        function updateAuthButton() {
+            const authBtn = document.getElementById('auth-btn');
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            authBtn.textContent = isLoggedIn ? 'Logout' : 'Login';
+        }
+
+        // Check login status and redirect to login page if not logged in
+        function checkLogin() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'index.html'; // Redirect to login page
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const video = document.getElementById('video');
+            const result = document.getElementById('result');
+            const prompt = document.getElementById('prompt');
+            const scanNewButton = document.getElementById('scan-new');
+            const checkoutButton = document.getElementById('checkout');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            let scanning = true;
+
+            // Initialize authentication button
+            const authBtn = document.getElementById('auth-btn');
+            authBtn.addEventListener('click', handleAuth);
+
+            // Start video stream
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', true); // Required for iOS
+                    video.play();
+                    video.addEventListener('loadedmetadata', () => {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        requestAnimationFrame(scanQRCode); // Start scanning
+                    });
+                })
+                .catch(err => {
+                    console.error('Error accessing webcam:', err);
+                    result.textContent = 'Error accessing webcam. Please check your permissions.';
+                });
+
+            // Function to scan QR Code
+            function scanQRCode() {
+                if (!scanning) return;
+
+                if (canvas.width === 0 || canvas.height === 0) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                }
+
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                try {
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+                    if (code) {
+                        result.textContent = 'QR Code Data: ' + code.data;
+                        scanning = false;
+                        showPrompt();
+
+                        const data = { tool_id: code.data };
+                        fetch('https://masivintranet-1.onrender.com/scanning', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(errorData => {
+                                    throw new Error(errorData.error || 'Unknown error occurred');
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Success:', data);
+                            localStorage.setItem("toolData", JSON.stringify(data)); // Store tool data in localStorage
+                            alert('Tool Data: ' + JSON.stringify(data)); // Notify the user of success
+                        })
+                        .catch(error => {
+                            console.error('Error:', error.message);
+                            alert('Error: ' + error.message); // Notify the user of the error
+                        });
+                    } else {
+                        result.textContent = 'Scanning...';
+                        requestAnimationFrame(scanQRCode); // Continue scanning
+                    }
+                } catch (e) {
+                    console.error('Error getting image data:', e);
+                    requestAnimationFrame(scanQRCode); // Continue scanning on error
+                }
+            }
+
+            // Show the prompt when QR code is found
+            function showPrompt() {
+                prompt.style.display = 'block';
+            }
+
+            // Event listeners for buttons
+            scanNewButton.addEventListener('click', () => {
+                result.textContent = 'Scanning...';
+                prompt.style.display = 'none';
+                scanning = true;
+                requestAnimationFrame(scanQRCode); // Restart scanning
+            });
+
+            checkoutButton.addEventListener('click', () => {
+                window.location.href = 'checkout.html'; // Redirect to checkout page
+            });
+
+            // Check login status and update button text
+            checkLogin();
+            updateAuthButton();
+        });
+    </script>
+</body>
+
+</html>

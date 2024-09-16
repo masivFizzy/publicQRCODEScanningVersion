@@ -6,61 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Check-In Tool</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        #video {
-            width: 50%;
-            height: 70%;
-            display: block;
-            margin: 0 auto;
-        }
-
-        #photo {
-            display: block;
-            max-width: 100%;
-            height: auto;
-            margin: 10px 0;
-            display: none; /* Initially hidden */
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            text-align: center;
-        }
-
-        .tool-data {
-            margin: 20px 0;
-        }
-
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 10px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            text-align: center;
-        }
-
-        .button:hover {
-            background-color: #0056b3;
-        }
-
-        .back-button {
-            background-color: #6c757d;
-        }
-
-        .back-button:hover {
-            background-color: #5a6268;
-        }
-    </style>
 </head>
 
 <body>
@@ -69,19 +14,22 @@
             <div class="logo">
                 <img src="mercedes-and-singh-15-2.png" alt="Logo">
             </div>
-            <div class="title">Check-In Tool</div>
-            <div class="dropdown">
-                <button class="dropdown-btn">Menu</button>
-                <div class="dropdown-content">
-                    <a href="landing.html">Home</a>
-                    <a href="scanning.html">Check-Out</a>
-                    <a href="scan-in.html">Check-In</a>
-                    <a href="addin.html">Add Tool</a>
-                    <a href="tutorial.html">Tutorial Video</a>
-                    <a href="addinTutorialVideo.html">Add Tutorial</a>
-                    <a href="customer.html">Customer List</a>
-                    <a href="addinCustomer.html">Add Customer</a>
+            <div class="title">MASIV INTRANET</div>
+            <div>
+                <div class="dropdown">
+                    <button class="dropdown-btn">Menu</button>
+                    <div class="dropdown-content">
+                        <a href="home.html">Home</a>
+                        <a href="scanout.html">Check-Out</a>
+                        <a href="scanin.html">Check-In</a>
+                        <!-- <a href="addin.html">Add Tool</a> -->
+                        <a href="tutorial.html">Tutorial Video</a>
+                        <!-- <a href="addinTutorialVideo.html">Add Tutorial</a> -->
+                        <!-- <a href="customer.html">Customer List</a> -->
+                        <!-- <a href="addinCustomer.html">Add Customer</a> -->
+                    </div>
                 </div>
+                <button title="Admin Access" id="auth-btn">Login</button>
             </div>
         </div>
     </header>
@@ -95,116 +43,126 @@
             <label for="tool-location">Select Tool Location:</label>
             <select id="tool-location" required>
                 <option value="" disabled selected>Tool Location</option>
-                <option value="shop-hangingshelf">Shop - Hanging Shelf</option>
-                <option value="shop-middletable">Shop - Middle Table</option>
-                <option value="shop-outside">Shop - Outside</option>
-                <option value="storage-left-front-shelf1">Storage - Left Front Shelf 1</option>
-                <option value="storage-left-middle-shelf1">Storage - Left Middle Shelf 1</option>
-                <option value="storage-left-rare-shelf1">Storage - Left Rare Shelf 1</option>
-                <option value="storage-left-front-shelf2">Storage - Left Front Shelf 2</option>
-                <option value="storage-left-middle-shelf2">Storage - Left Middle Shelf 2</option>
-                <option value="storage-left-rare-shelf2">Storage - Left Rare Shelf 2</option>
-                <option value="storage-left-front-shelf3">Storage - Left Front Shelf 3</option>
-                <option value="storage-left-middle-shelf3">Storage - Left Middle Shelf 3</option>
-                <option value="storage-left-rare-shelf3">Storage - Left Rare Shelf 3</option>
-                <option value="storage-right-front-shelf1">Storage - Right Front Shelf 1</option>
-                <option value="storage-right-middle-shelf1">Storage - Right Middle Shelf 1</option>
-                <option value="storage-right-rare-shelf1">Storage - Right Rare Shelf 1</option>
-                <option value="storage-right-front-shelf2">Storage - Right Front Shelf 2</option>
-                <option value="storage-right-middle-shelf2">Storage - Right Middle Shelf 2</option>
-                <option value="storage-right-rare-shelf2">Storage - Right Rare Shelf 2</option>
-                <option value="storage-right-front-shelf3">Storage - Right Front Shelf 3</option>
-                <option value="storage-right-middle-shelf3">Storage - Right Middle Shelf 3</option>
-                <option value="storage-right-rare-shelf3">Storage - Right Rare Shelf 3</option>
+                <!-- Locations -->
+                <option value="it-shed">IT-Shed</option>
+                <option value="shop">Shop</option>
+                <option value="storage">Storage</option>
+                <!-- Add more locations as needed -->
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="tool-condition">Select Tool Condition:</label>
+            <select id="tool-condition" required>
+                <option value="" disabled selected>Tool Condition</option>
+                <option value="good">Good</option>
+                <option value="medium">Medium</option>
+                <option value="needs-repair">Needs Repair</option>
             </select>
         </div>
 
         <!-- Camera section -->
         <video id="video" autoplay></video>
         <canvas id="canvas" style="display:none;"></canvas>
-        <img id="photo" alt="Captured Photo">
+        <img id="photo" alt="Captured Photo" style="display:none;">
         <button class="button" id="capture-photo">Capture Photo</button>
-        <a href="scan-in.html" class="button back-button">Back to Scanning</a>
+        <a href="scanin.html" class="button back-button">Back to Scanning</a>
         <button class="button" id="confirm-checkin">Confirm and Check-In</button>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const tokenExpiryDate = localStorage.getItem('token_expiry_date');
-            if (tokenExpiryDate) {
-                const expiryTime = new Date(tokenExpiryDate).getTime();
-                const currentTime = new Date().getTime();
-                if (currentTime > expiryTime) {
-                    localStorage.clear();
-                    alert('Your session has expired. Please log in again.');
-                    window.location.href = 'index.html';
+            // Define the handleAuth function
+            function handleAuth() {
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                if (isLoggedIn) {
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('username');
+                    window.location.href = 'index.html'; // Redirect to login page
+                } else {
+                    window.location.href = 'index.html'; // Redirect to login page
                 }
-            } else {
-                window.location.href = 'index.html';
             }
 
+            // Function to update the authentication button text based on login status
+            function updateAuthButton() {
+                const authBtn = document.getElementById('auth-btn');
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                authBtn.textContent = isLoggedIn ? 'Logout' : 'Login';
+                authBtn.addEventListener('click', handleAuth);
+            }
+
+            // Redirect to login page if not logged in
+            function checkLogin() {
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                if (!isLoggedIn) {
+                    window.location.href = 'index.html'; // Redirect to login page
+                }
+            }
+
+            // Check login status on page load
+            checkLogin();
+            updateAuthButton();
+
+            // Load tool data from localStorage
             const toolDataString = localStorage.getItem('toolData');
             const toolData = JSON.parse(toolDataString) || {
-                ToolAvailability: 'Unknown',
-                ToolCondition: 'Unknown',
-                ToolID: 'N/A',
-                ToolLocation: 'Unknown',
-                ToolName: 'Unknown Tool'
+                availability: 'Unknown',
+                condition: 'Unknown',
+                _id: 'N/A',
+                location: 'Unknown',
+                name: 'Unknown Tool',
+                type: 'Unknown'
             };
 
+            // Display tool data
             const toolDataDiv = document.getElementById('tool-data');
             toolDataDiv.innerHTML = `
                 <h2>Tool Details</h2>
-                <p><strong>Name:</strong> ${toolData.ToolName}</p>
-                <p><strong>ID:</strong> ${toolData.ToolID}</p>
-                <p><strong>Condition:</strong> ${toolData.ToolCondition}</p>
-                <p><strong>Location:</strong> ${toolData.ToolLocation}</p>
-                <p><strong>Availability:</strong> ${toolData.ToolAvailability}</p>
+                <p><strong>Name:</strong> ${toolData.name}</p>
+                <p><strong>ID:</strong> ${toolData._id.$oid || toolData._id}</p>
+                <p><strong>Type:</strong> ${toolData.type}</p>
+                <p><strong>Condition:</strong> ${toolData.condition}</p>
+                <p><strong>Location:</strong> ${toolData.location}</p>
+                <p><strong>Availability:</strong> ${toolData.availability}</p>
             `;
 
-            function updateToolAvailability(toolID, toolHolder, toolCondition, toolLocation, photoData) {
-                const url = 'https://masivintranet.onrender.com/check-in-tool';
+            // Function to update tool availability
+            async function updateToolAvailability(toolID, toolHolder, toolCondition, toolLocation) {
+                const url = 'https://masivintranet-1.onrender.com/check-in-tool';
                 const data = {
-                    access_token: localStorage.getItem('access_token'),
                     tool_id: toolID,
                     tool_holder: toolHolder,
                     tool_condition: toolCondition,
-                    tool_location: toolLocation,
-                    check_in_photo: photoData
+                    tool_location: toolLocation
                 };
-                console.log(data);
-                return fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.json().then(errorData => {
-                                throw new Error(errorData.error || 'Unknown error occurred');
-                            });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Success:', data.message);
-                        alert(data.message);
-                        return true;
-                    })
-                    .catch(error => {
-                        console.error('Error:', error.message);
-                        alert('Error: ' + error.message);
-                        return false;
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
                     });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Unknown error occurred');
+                    }
+                    const result = await response.json();
+                    alert(result.message);
+                    return true;
+                } catch (error) {
+                    console.error('Error:', error.message);
+                    alert('Error: ' + error.message);
+                    return false;
+                }
             }
 
+            // Set up video stream
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
             const photo = document.getElementById('photo');
 
-            // Start video stream
             navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                 .then(stream => {
                     video.srcObject = stream;
@@ -216,6 +174,7 @@
                     alert('Error accessing webcam.');
                 });
 
+            // Capture photo
             document.getElementById('capture-photo').addEventListener('click', () => {
                 const context = canvas.getContext('2d');
                 canvas.width = video.videoWidth;
@@ -227,11 +186,11 @@
                 localStorage.setItem('photoData', photoData); // Save photo data to local storage
             });
 
-            document.getElementById('confirm-checkin').addEventListener('click', () => {
-                // Retrieve photo data URL from localStorage
+            // Confirm check-in
+            document.getElementById('confirm-checkin').addEventListener('click', async () => {
                 const photoData = localStorage.getItem('photoData');
 
-                if (!toolData || !toolData.ToolID) {
+                if (!toolData || !toolData._id) {
                     alert('No tool data available. Please scan a QR code again.');
                     return;
                 }
@@ -242,7 +201,7 @@
                     return;
                 }
 
-                if (toolLocation !== toolData.ToolLocation) {
+                if (toolLocation !== toolData.location) {
                     alert('Selected location does not match the tool\'s location. Please check the location and try again.');
                     return;
                 }
@@ -252,25 +211,23 @@
                     return;
                 }
 
-                const toolHolder = prompt('Enter the name of the person checking in the tool:');
+                const toolHolder = localStorage.getItem('username');
                 if (!toolHolder) {
-                    alert('Tool holder name is required.');
+                    alert('User is not logged in.');
                     return;
                 }
 
-                const toolCondition = prompt('Enter the condition of the tool (good, medium, needs-repair):');
-                if (!toolCondition || !['good', 'medium', 'needs-repair'].includes(toolCondition)) {
-                    alert('Valid tool condition is required.');
+                const toolCondition = document.getElementById('tool-condition').value;
+                if (!toolCondition) {
+                    alert('Please select the condition of the tool.');
                     return;
                 }
 
-                updateToolAvailability(toolData.ToolID, toolHolder, toolCondition, toolLocation, photoData)
-                    .then(success => {
-                        if (success) {
-                            localStorage.removeItem('photoData'); // Clear photo data after successful check-in
-                            window.location.href = 'landing.html';
-                        }
-                    });
+                const success = await updateToolAvailability(toolData._id.$oid || toolData._id, toolHolder, toolCondition, toolLocation);
+                if (success) {
+                    localStorage.removeItem('photoData'); // Clear photo data after successful check-in
+                    window.location.href = 'home.html';
+                }
             });
         });
     </script>

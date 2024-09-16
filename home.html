@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Fetcher</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="mercedes-and-singh-15-2.png" alt="Logo">
+            </div>
+            <div class="title">MASIV INTRANET</div>
+            <div>
+                <div class="dropdown">
+                    <button class="dropdown-btn">Menu</button>
+                    <div class="dropdown-content">
+                        <a href="home.html">Home</a>
+                        <a href="scanout.html">Check-Out</a>
+                        <a href="scanin.html">Check-In</a>
+                        <!-- <a href="addin.html">Add Tool</a> -->
+                        <a href="tutorial.html">Tutorial Video</a>
+                        <!-- <a href="addinTutorialVideo.html">Add Tutorial</a> -->
+                        <!-- <a href="customer.html">Customer List</a> -->
+                        <!-- <a href="addinCustomer.html">Add Customer</a> -->
+                    </div>
+                </div>
+                <button id="auth-btn" title="Admin Access" onclick="handleAuth()">Logout</button>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <h1>Documents</h1>
+        <div class="search-container">
+            <form id="search-form">
+                <input type="text" id="search-input" placeholder="Search.." name="search">
+                <button type="submit"><i class="fa fa-search"></i></button>
+            </form>
+        </div>
+        <ul id="document-list">
+            <!-- Documents will be loaded here -->
+        </ul>
+    </div>
+
+    <script>
+        // Redirect to login page if not logged in
+        function checkLogin() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'index.html'; // Redirect to login page
+            }
+        }
+
+        function handleAuth() {
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                if (isLoggedIn) {
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('username');
+                    window.location.href = 'index.html'; // Redirect to login page
+                } else {
+                    window.location.href = 'index.html'; // Redirect to login page
+                }
+            }
+
+        // Fetch documents from the server
+        async function fetchDocuments() {
+            try {
+                const response = await fetch('https://masivintranet-1.onrender.com/documents');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const documents = await response.json();
+
+                const list = document.getElementById('document-list');
+                list.innerHTML = '';  // Clear any existing content
+
+                documents.forEach(doc => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = JSON.stringify(doc, null, 2);  // Format JSON for readability
+                    list.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('Error fetching documents:', error);
+            }
+        }
+
+        // Call the function to fetch documents when the page loads
+        fetchDocuments();
+
+        document.getElementById('search-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const listItems = document.querySelectorAll('#document-list li');
+            listItems.forEach(item => {
+                item.style.display = item.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+
+        document.getElementById('search-input').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            const listItems = document.querySelectorAll('#document-list li');
+            listItems.forEach(item => {
+                item.style.display = item.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+
+        // Check login status on page load
+        checkLogin();
+    </script>
+</body>
+
+</html>
