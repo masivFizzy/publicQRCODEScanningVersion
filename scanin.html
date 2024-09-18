@@ -54,10 +54,26 @@
             authBtn.textContent = isLoggedIn ? 'Logout' : 'Login';
         }
 
+        // Redirect to login page if not logged in
         function checkLogin() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             if (!isLoggedIn) {
-                window.location.href = 'index.html';
+                window.location.href = 'index.html'; // Redirect to login page
+            } else {
+                checkAdminRole(); // Check for admin role if logged in
+            }
+        }
+
+        function checkAdminRole() {
+            const userRole = localStorage.getItem('userrole');
+            if (userRole === 'admin') {
+                const adminLinks = `
+                    <a href="addTool.html">Add Tool</a>
+                    <a href="addTutorial.html">Add Tutorial</a>
+                    <a href="addUser.html">Add User</a>
+                    <a href="getUsers.html">All User</a>
+                `;
+                document.getElementById('admin-links').innerHTML = adminLinks;
             }
         }
 
