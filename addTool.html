@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Add Tool</h1>
+        <a href="home.html">Back to Home</a>
+    </header>
+    <div class="container">
+        <form id="add-tool-form">
+            <div>
+                <label for="name">Tool Name:</label>
+                <input type="text" id="name" required>
+            </div>
+            <div>
+                <label for="type">Tool Type:</label>
+                <select id="type" required>
+                    <option value="">Select Tool Type</option>
+                    <option value="it-equipment">IT Equipment</option>
+                    <option value="power-tool">Power Tool</option>
+                    <option value="cleaning-tool">Cleaning Tool</option>
+                </select>
+            </div>
+            <div>
+                <label for="condition">Condition:</label>
+                <select id="condition" required>
+                    <option value="">Select Condition</option>
+                    <option value="new">New</option>
+                    <option value="good">Good</option>
+                    <option value="medium">Medium</option>
+                    <option value="needs-repair">Needs Repair</option>
+                </select>
+            </div>
+            <div>
+                <label for="location">Location:</label>
+                <select id="location" required>
+                    <option value="">Select Location</option>
+                    <option value="it-shed">IT-Shed</option>
+                    <option value="shop">Shop</option>
+                    <option value="storage">Storage</option>
+                </select>
+            </div>
+            <button type="submit">Add Tool</button>
+        </form>
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        // Redirect to login page if not logged in
+        function checkLogin() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'index.html'; // Redirect to login page
+            } else {
+                checkAdminRole(); // Check for admin role if logged in
+            }
+        }
+
+        function checkAdminRole() {
+            const userRole = localStorage.getItem('userrole');
+            if (userRole !== 'admin') {
+                window.location.href = 'home.html'; // Redirect non-admin users to home
+            }
+        }
+
+        document.getElementById('add-tool-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const type = document.getElementById('type').value;
+            const condition = document.getElementById('condition').value;
+            const location = document.getElementById('location').value;
+
+            const response = await fetch('https://masivintranet-1.onrender.com/add-tool', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, type, condition, location }),
+            });
+
+            if (response.ok) {
+                const result = await response.blob();
+                const url = window.URL.createObjectURL(result);
+                
+                // Create an anchor element and trigger download
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'qr_code_tool.png'; // Set the name for the downloaded file
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } else {
+                const result = await response.json();
+                document.getElementById('message').textContent = result.message || result.error;
+            }
+        });
+
+        // Check login and role when the page loads
+        checkLogin();
+    </script>
+</body>
+</html>

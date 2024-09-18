@@ -80,6 +80,7 @@
                     messageDiv.textContent = data.message || 'Login successful';
                     messageDiv.className = 'message success';
                     localStorage.setItem('username', username);
+                    localStorage.setItem('userrole', data.role);
                     localStorage.setItem('isLoggedIn', 'true');
                     updateAuthButton();
                     setTimeout(() => {

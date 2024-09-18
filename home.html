@@ -23,11 +23,8 @@
                         <a href="home.html">Home</a>
                         <a href="scanout.html">Check-Out</a>
                         <a href="scanin.html">Check-In</a>
-                        <!-- <a href="addin.html">Add Tool</a> -->
                         <a href="tutorial.html">Tutorial Video</a>
-                        <!-- <a href="addinTutorialVideo.html">Add Tutorial</a> -->
-                        <!-- <a href="customer.html">Customer List</a> -->
-                        <!-- <a href="addinCustomer.html">Add Customer</a> -->
+                        <div id="admin-links"></div> <!-- Placeholder for admin links -->
                     </div>
                 </div>
                 <button id="auth-btn" title="Admin Access" onclick="handleAuth()">Logout</button>
@@ -53,19 +50,35 @@
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             if (!isLoggedIn) {
                 window.location.href = 'index.html'; // Redirect to login page
+            } else {
+                checkAdminRole(); // Check for admin role if logged in
+            }
+        }
+
+        function checkAdminRole() {
+            const userRole = localStorage.getItem('userrole');
+            if (userRole === 'admin') {
+                const adminLinks = `
+                    <a href="addTool.html">Add Tool</a>
+                    <a href="addTutorial.html">Add Tutorial</a>
+                    <a href="addUser.html">Add User</a>
+                    <a href="getUsers.html">All User</a>
+                `;
+                document.getElementById('admin-links').innerHTML = adminLinks;
             }
         }
 
         function handleAuth() {
-                const isLoggedIn = localStorage.getItem('isLoggedIn');
-                if (isLoggedIn) {
-                    localStorage.removeItem('isLoggedIn');
-                    localStorage.removeItem('username');
-                    window.location.href = 'index.html'; // Redirect to login page
-                } else {
-                    window.location.href = 'index.html'; // Redirect to login page
-                }
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('username');
+                localStorage.removeItem('userRole'); // Remove user role on logout
+                window.location.href = 'index.html'; // Redirect to login page
+            } else {
+                window.location.href = 'index.html'; // Redirect to login page
             }
+        }
 
         // Fetch documents from the server
         async function fetchDocuments() {
