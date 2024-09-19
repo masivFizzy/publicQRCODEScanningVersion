@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adding Customer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="mercedes-and-singh-15-2.png" alt="Logo">
+            </div>
+            <div class="title">MASIV INTRANET</div>
+            <div>
+                <div class="dropdown">
+                    <button class="dropdown-btn">Menu</button>
+                    <div class="dropdown-content">
+                        <a href="home.html">Home</a>
+                        <a href="scanout.html">Check-Out</a>
+                        <a href="scanin.html">Check-In</a>
+                        <a href="tutorial.html">Tutorial Video</a>
+                        <a href="addTool.html">Add Tool</a>
+                        <a href="addTutorial.html">Add Tutorial</a>
+                        <a href="addUser.html">Add User</a>
+                        <a href="getUsers.html">All Users</a>
+                        <a href="addCustomer.html">Add Customer</a>
+                        <a href="getCustomer.html">All Customers</a>
+                    </div>
+                </div>
+                <button id="auth-btn" title="Admin Access" onclick="handleAuth()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Add Customer</h1>
+        <div class="cust-data" id="cust-data">
+            <form id="cust-form">
+                <input type="text" id="cust_first_name" placeholder="First Name" required />
+                <input type="text" id="cust_last_name" placeholder="Last Name" required />
+                <input type="text" id="cust_email" placeholder="Email" required />
+                <input type="text" id="cust_phone" placeholder="Phone" required />
+                <div class="company-container">
+                    <input type="text" id="cust_company" placeholder="Company" required />
+                    <span class="info-icon" title="If you do not have a company, select other">ℹ️</span>
+                </div>
+                <form id="businessDivisionForm">
+                    <fieldset>
+                        <legend>Select Business Divisions</legend>
+                        <label>
+                            <input type="checkbox" name="businessDivision" value="masiv">
+                            MASIV
+                        </label>
+                        <label>
+                            <input type="checkbox" name="businessDivision" value="masivx">
+                            MASIVX
+                        </label>
+                        <label>
+                            <input type="checkbox" name="businessDivision" value="h-o-m-e.ai">
+                            H-O-M-E.ai
+                        </label>
+                        <label>
+                            <input type="checkbox" name="businessDivision" value="mtharu">
+                            MTHARU
+                        </label>
+                    </fieldset>
+                </form>                
+            </form>
+        </div>
+        <a href="scanning.html" class="button back-button">Back to Scanning</a>
+        <button class="button" id="confirm-add">Add Customer</button>
+        <p id="feedback" style="text-align: center; margin-top: 20px; color: red;"></p>
+    </div>
+
+    <script>
+        // Redirect to login page if not logged in
+        function checkLogin() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'index.html'; // Redirect to login page
+            } else {
+                checkAdminRole(); // Check for admin role if logged in
+            }
+        }
+
+        function checkAdminRole() {
+            const userRole = localStorage.getItem('userrole');
+            if (userRole !== 'admin') {
+                window.location.href = 'home.html'; // Redirect non-admin users to home
+            }
+        }
+
+        function handleAuth() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('username');
+                window.location.href = 'index.html'; // Redirect to login page
+            } else {
+                window.location.href = 'index.html'; // Redirect to login page
+            }
+        }
+        document.getElementById('confirm-add').addEventListener('click', async () => {
+            const custFName = document.getElementById('cust_first_name').value;
+            const custLName = document.getElementById('cust_last_name').value;
+            const custEmail = document.getElementById('cust_email').value;
+            const custPhone = document.getElementById('cust_phone').value;
+            const custCompany = document.getElementById('cust_company').value;
+            const checkboxes = document.querySelectorAll('input[name="businessDivision"]:checked');
+            const businessDivision = Array.from(checkboxes).map(checkbox => checkbox.value);
+            console.log(businessDivision)
+            if (!custFName || !custLName || !custEmail || !custPhone || !custCompany || !businessDivision) {
+                document.getElementById('feedback').textContent = 'Please fill out all required fields.';
+                return;
+            }
+
+            const customerData = {
+                access_token: localStorage.getItem('access_token'),
+                cust_first_name: custFName,
+                cust_last_name: custLName,
+                cust_email: custEmail,
+                cust_phone: custPhone,
+                cust_company: custCompany,
+                bus_div: businessDivision
+            };
+
+            try {
+                const response = await fetch('https://masivintranet-1.onrender.com/add-customer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(customerData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('feedback').textContent = result.message || 'Customer added successfully!';
+                    document.getElementById('cust-form').reset();
+                    console.log('Redirecting to landing.html');
+                    window.location.href = 'home.html';
+                } else {
+                    const errorData = await response.json();
+                    document.getElementById('feedback').textContent = errorData.error || 'Failed to add customer.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('feedback').textContent = 'An error occurred while adding the customer.';
+            }
+        });
+        checkLogin();
+    </script>
+</body>
+
+</html>

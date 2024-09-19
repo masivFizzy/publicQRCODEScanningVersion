@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Customers</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="mercedes-and-singh-15-2.png" alt="Logo">
+            </div>
+            <div class="title">MASIV INTRANET</div>
+            <div>
+                <div class="dropdown">
+                    <button class="dropdown-btn">Menu</button>
+                    <div class="dropdown-content">
+                        <a href="home.html">Home</a>
+                        <a href="scanout.html">Check-Out</a>
+                        <a href="scanin.html">Check-In</a>
+                        <a href="tutorial.html">Tutorial Video</a>
+                        <a href="addTool.html">Add Tool</a>
+                        <a href="addTutorial.html">Add Tutorial</a>
+                        <a href="addUser.html">Add User</a>
+                        <a href="getUsers.html">All Users</a>
+                        <a href="addCustomer.html">Add Customer</a>
+                        <a href="getCustomer.html">All Customers</a>
+                    </div>
+                </div>
+                <button id="auth-btn" title="Admin Access" onclick="handleAuth()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>All Current Customers</h1>
+        <div class="search-container">
+            <form id="search-form">
+                <input type="text" id="search-input" placeholder="Search.." name="search">
+                <button type="submit"><i class="fa fa-search"></i></button>
+            </form>
+        </div>
+        
+        <div id="loading-message">Loading customers...</div>
+        <div id="error-message" style="display:none;">Error loading customers.</div>
+        
+        <table id="cust-table">
+            <thead>
+                <!-- Header will be populated by JavaScript -->
+            </thead>
+            <tbody>
+                <!-- Rows will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+
+        // Redirect to login page if not logged in
+        function checkLogin() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'index.html'; // Redirect to login page
+            } else {
+                checkAdminRole(); // Check for admin role if logged in
+            }
+        }
+
+        function checkAdminRole() {
+            const userRole = localStorage.getItem('userrole');
+            if (userRole !== 'admin') {
+                window.location.href = 'home.html'; // Redirect non-admin users to home
+            }
+        }
+
+        function handleAuth() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('username');
+                window.location.href = 'index.html'; // Redirect to login page
+            } else {
+                window.location.href = 'index.html'; // Redirect to login page
+            }
+        }
+
+        const headers = ["id", "first_name", "last_name", "email", "phone", "company", "business_divisions"];
+        let custDoc = [];
+
+        function renderTable(data) {
+            const custTable = document.getElementById('cust-table');
+            const thead = custTable.querySelector('thead');
+            const tbody = custTable.querySelector('tbody');
+
+            // Clear previous content
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            // Create header
+            const headerRow = document.createElement('tr');
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+
+            // Create body
+            data.forEach(doc => {
+                const valueRow = document.createElement('tr');
+                
+                headers.forEach((header, index) => {
+                    const td = document.createElement('td');
+                    if (header === "id") {
+                        const idContainer = document.createElement('div');
+                        idContainer.style.display = 'flex';
+                        idContainer.style.alignItems = 'center';
+
+                        const idText = document.createElement('span');
+                        idText.textContent = "hidden"; // Default to "hidden"
+                        idText.style.cursor = 'pointer'; // Change cursor to pointer
+                        idText.addEventListener('click', () => {
+                            // Toggle between "hidden" and the actual ID
+                            if (idText.textContent === "hidden") {
+                                idText.textContent = doc['id']; // Show ID
+                            } else {
+                                idText.textContent = "hidden"; // Hide ID
+                            }
+                        });
+
+                        const copyButton = document.createElement('button');
+                        copyButton.textContent = "Copy";
+                        copyButton.style.marginLeft = '10px';
+                        copyButton.addEventListener('click', (event) => {
+                            event.stopPropagation(); // Prevent triggering the id toggle
+                            navigator.clipboard.writeText(doc['id']).then(() => {
+                                alert('ID copied to clipboard!');
+                            }).catch(err => {
+                                console.error('Error copying ID:', err);
+                            });
+                        });
+
+                        idContainer.appendChild(idText);
+                        idContainer.appendChild(copyButton);
+                        td.appendChild(idContainer);
+                    } else {
+                        td.textContent = doc[header] || 'N/A'; // Use 'N/A' if the key is missing
+                    }
+                    valueRow.appendChild(td);
+                });
+
+                tbody.appendChild(valueRow);
+            });
+        }
+
+        function fetchCustomers() {
+            document.getElementById('loading-message').style.display = 'block';
+
+            fetch('https://masivintranet-1.onrender.com/customers', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                custDoc = data;
+                renderTable(custDoc);
+                document.getElementById('loading-message').style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error fetching documents:', error);
+                document.getElementById('loading-message').style.display = 'none';
+                document.getElementById('error-message').style.display = 'block';
+            });
+        }
+
+        fetchCustomers();
+
+        document.getElementById('search-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filteredDocs = custDoc.filter(doc => {
+                return JSON.stringify(doc).toLowerCase().includes(query);
+            });
+            renderTable(filteredDocs);
+        });
+
+        document.getElementById('search-input').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            const filteredDocs = custDoc.filter(doc => {
+                return JSON.stringify(doc).toLowerCase().includes(query);
+            });
+            renderTable(filteredDocs);
+        });
+        checkLogin();
+    </script>
+</body>
+
+</html>

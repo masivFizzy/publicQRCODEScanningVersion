@@ -253,3 +253,30 @@ button:hover {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     z-index: 1000;
 }
+
+/* Customer Table Styling */
+#cust-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#cust-table th, #cust-table td {
+    border: 1px solid #ccc;
+    padding: 12px;
+    text-align: left;
+}
+
+#cust-table th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+#cust-table tr:nth-child(even) {
+    background-color: #f2f2f2; /* Zebra striping */
+}
+
+#cust-table tr:hover {
+    background-color: #e0e0e0; /* Highlight on hover */
+}
