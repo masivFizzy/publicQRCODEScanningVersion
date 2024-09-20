@@ -280,3 +280,40 @@ button:hover {
 #cust-table tr:hover {
     background-color: #e0e0e0; /* Highlight on hover */
 }
+
+/* Block styling */
+.block-container {
+    width: 80%;
+    max-width: 1200px; /* Adjusted max-width for a wider grid */
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin: 40px auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsive grid */
+    gap: 20px; /* Space between grid items */
+}
+.block {
+    border: 1px solid #ccc;
+    padding: 20%;
+    background-color: #007bff;
+    color: white; /* Text color for blocks */
+    border-radius: 5px; /* Rounded corners */
+    text-align: center; /* Centered text */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+.block a {
+    color: white; /* Link color */
+    text-decoration: none; /* Remove underline */
+    font-weight: bold; /* Bold links */
+}
+
+.block:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.block a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
