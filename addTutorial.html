@@ -12,7 +12,7 @@
         <a href="home.html">Back to Home</a>
     </header>
     <div class="container">
-        <form id="add-tutorial-form">
+        <form id="add-tutorial-form" enctype="multipart/form-data">
             <div>
                 <label for="title">Tutorial Title:</label>
                 <input type="text" id="title" required>
@@ -26,8 +26,8 @@
                 </select>
             </div>
             <div>
-                <label for="url">URL or Path:</label>
-                <input type="text" id="url" required>
+                <label for="file">Upload File:</label>
+                <input type="file" id="file" accept=".mp4, .jpg, .png, .pdf" required>
             </div>
             <button type="submit">Add Tutorial</button>
         </form>
@@ -56,19 +56,23 @@
             event.preventDefault();
             const title = document.getElementById('title').value;
             const type = document.getElementById('type').value;
-            const url = document.getElementById('url').value;
+            const fileInput = document.getElementById('file');
+            const file = fileInput.files[0];
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('type', type);
+            formData.append('file', file);
 
             const response = await fetch('https://masivintranet-1.onrender.com/add-tutorial', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ title, type, url }),
+                body: formData,
             });
 
             const result = await response.json();
             document.getElementById('message').textContent = result.message || result.error;
         });
+
         checkLogin();
     </script>
 </body>

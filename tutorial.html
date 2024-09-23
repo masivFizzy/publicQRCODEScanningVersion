@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tutorial</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 </head>
 
 <body>
@@ -23,30 +24,60 @@
                         <a href="getTools.html">Tools</a>
                         <a href="scanout.html">Check-Out</a>
                         <a href="scanin.html">Check-In</a>
-                        <!-- <a href="addin.html">Add Tool</a> -->
                         <a href="tutorial.html">Tutorial Video</a>
-                        <!-- <a href="addinTutorialVideo.html">Add Tutorial</a> -->
-                        <!-- <a href="customer.html">Customer List</a> -->
-                        <!-- <a href="addinCustomer.html">Add Customer</a> -->
+                        <div id="admin-links"></div> <!-- Placeholder for admin links -->
                     </div>
                 </div>
-                <button id="auth-btn" title="Admin Access" onclick="handleAuth()">Login</button>
+                <button id="auth-btn" title="Admin Access" onclick="handleAuth()">Logout</button>
             </div>
         </div>
     </header>
 
     <div class="container">
-        <h1>Tutorial Section</h1>
-        <div class="message">Coming Soon!</div>
-        <a href="home.html" class="button">Back to Home</a>
+        <h1>Tutorials</h1>
+        <div class="search-container">
+            <form id="search-form">
+                <input type="text" id="search-input" placeholder="Search.." name="search">
+                <button type="submit"><i class="fa fa-search"></i></button>
+            </form>
+        </div>
+        <ul id="tutorial-list">
+            <!-- Documents will be loaded here -->
+        </ul>
     </div>
 
     <script>
+        // Redirect to login page if not logged in
+        function checkLogin() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (!isLoggedIn) {
+                window.location.href = 'index.html'; // Redirect to login page
+            } else {
+                checkAdminRole(); // Check for admin role if logged in
+            }
+        }
+
+        function checkAdminRole() {
+            const userRole = localStorage.getItem('userrole');
+            if (userRole === 'admin') {
+                const adminLinks = `
+                    <a href="addTool.html">Add Tool</a>
+                    <a href="addTutorial.html">Add Tutorial</a>
+                    <a href="addUser.html">Add User</a>
+                    <a href="getUsers.html">All User</a>
+                    <a href="addCustomer.html">Add Customer</a>
+                    <a href="getCustomer.html">All Customers</a>
+                `;
+                document.getElementById('admin-links').innerHTML = adminLinks;
+            }
+        }
+
         function handleAuth() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             if (isLoggedIn) {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('username');
+                localStorage.removeItem('userRole'); // Remove user role on logout
                 window.location.href = 'index.html'; // Redirect to login page
             } else {
                 window.location.href = 'index.html'; // Redirect to login page
@@ -59,6 +90,55 @@
             authBtn.textContent = isLoggedIn ? 'Logout' : 'Login';
             authBtn.addEventListener('click', handleAuth);
         });
+        // Fetch documents from the server
+        async function fetchDocuments() {
+            try {
+                const response = await fetch('https://masivintranet-1.onrender.com/tutorials');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const documents = await response.json();
+
+                const list = document.getElementById('tutorial-list');
+                list.innerHTML = '';  // Clear any existing content
+
+                documents.forEach(doc => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                    <div class="tutorial-item">
+                        <h3>${doc.title}</h3>
+                        <a href="${doc.url}" class="play-button" target="_blank">
+                            <i class="fas fa-play"></i> Play
+                        </a>
+                    </div>
+                `;
+                    list.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('Error fetching documents:', error);
+            }
+        }
+
+        // Call the function to fetch documents when the page loads
+        fetchDocuments();
+
+        document.getElementById('search-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const listItems = document.querySelectorAll('#tutorial-list li');
+            listItems.forEach(item => {
+                item.style.display = item.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+
+        document.getElementById('search-input').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            const listItems = document.querySelectorAll('#tutorial-list li');
+            listItems.forEach(item => {
+                item.style.display = item.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+        checkLogin();
     </script>
 </body>
 
