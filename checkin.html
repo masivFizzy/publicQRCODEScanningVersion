@@ -23,12 +23,8 @@
                         <a href="getTools.html">Tools</a>
                         <a href="scanout.html">Check-Out</a>
                         <a href="scanin.html">Check-In</a>
-                        <!-- <a href="addin.html">Add Tool</a> -->
                         <a href="tutorial.html">Tutorial Video</a>
                         <div id="admin-links"></div>
-                        <!-- <a href="addinTutorialVideo.html">Add Tutorial</a> -->
-                        <!-- <a href="customer.html">Customer List</a> -->
-                        <!-- <a href="addinCustomer.html">Add Customer</a> -->
                     </div>
                 </div>
                 <button title="Admin Access" id="auth-btn">Login</button>
@@ -38,18 +34,15 @@
 
     <div class="container">
         <h1>Check-In Tool</h1>
-        <div class="tool-data" id="tool-data">
-            <!-- Tool data will be injected here by JavaScript -->
-        </div>
+        <div class="tool-data" id="tool-data"></div>
+        
         <div class="form-group">
             <label for="tool-location">Select Tool Location:</label>
             <select id="tool-location" required>
                 <option value="" disabled selected>Tool Location</option>
-                <!-- Locations -->
                 <option value="it-shed">IT-Shed</option>
                 <option value="shop">Shop</option>
                 <option value="storage">Storage</option>
-                <!-- Add more locations as needed -->
             </select>
         </div>
 
@@ -63,7 +56,6 @@
             </select>
         </div>
 
-        <!-- Camera section -->
         <video id="video" autoplay></video>
         <canvas id="canvas" style="display:none;"></canvas>
         <img id="photo" alt="Captured Photo" style="display:none;">
@@ -74,19 +66,17 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Define the handleAuth function
             function handleAuth() {
                 const isLoggedIn = localStorage.getItem('isLoggedIn');
                 if (isLoggedIn) {
                     localStorage.removeItem('isLoggedIn');
                     localStorage.removeItem('username');
-                    window.location.href = 'index.html'; // Redirect to login page
+                    window.location.href = 'index.html';
                 } else {
-                    window.location.href = 'index.html'; // Redirect to login page
+                    window.location.href = 'index.html';
                 }
             }
 
-            // Function to update the authentication button text based on login status
             function updateAuthButton() {
                 const authBtn = document.getElementById('auth-btn');
                 const isLoggedIn = localStorage.getItem('isLoggedIn');
@@ -94,36 +84,34 @@
                 authBtn.addEventListener('click', handleAuth);
             }
 
-            // Redirect to login page if not logged in
-        function checkLogin() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            if (!isLoggedIn) {
-                window.location.href = 'index.html'; // Redirect to login page
-            } else {
-                checkAdminRole(); // Check for admin role if logged in
+            function checkLogin() {
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                if (!isLoggedIn) {
+                    window.location.href = 'index.html';
+                } else {
+                    checkAdminRole();
+                }
             }
-        }
 
-        function checkAdminRole() {
-            const userRole = localStorage.getItem('userrole');
-            if (userRole === 'admin') {
-                const adminLinks = `
-                    <a href="addTool.html">Add Tool</a>
-                    <a href="addTutorial.html">Add Tutorial</a>
-                    <a href="addUser.html">Add User</a>
-                    <a href="getUsers.html">All User</a>
-                    <a href="addCustomer.html">Add Customer</a>
-                    <a href="getCustomer.html">All Customers</a>
-                `;
-                document.getElementById('admin-links').innerHTML = adminLinks;
+            function checkAdminRole() {
+                const userRole = localStorage.getItem('userrole');
+                if (userRole === 'admin') {
+                    const adminLinks = `
+                        <a href="addTool.html">Add Tool</a>
+                        <a href="addTutorial.html">Add Tutorial</a>
+                        <a href="addUser.html">Add User</a>
+                        <a href="getUsers.html">All Users</a>
+                        <a href="addCustomer.html">Add Customer</a>
+                        <a href="getCustomer.html">All Customers</a>
+                        <a href="getTransactions.html">All Tool Transactions</a>
+                    `;
+                    document.getElementById('admin-links').innerHTML = adminLinks;
+                }
             }
-        }
 
-            // Check login status on page load
             checkLogin();
             updateAuthButton();
 
-            // Load tool data from localStorage
             const toolDataString = localStorage.getItem('toolData');
             const toolData = JSON.parse(toolDataString) || {
                 availability: 'Unknown',
@@ -134,7 +122,6 @@
                 type: 'Unknown'
             };
 
-            // Display tool data
             const toolDataDiv = document.getElementById('tool-data');
             toolDataDiv.innerHTML = `
                 <h2>Tool Details</h2>
@@ -146,22 +133,12 @@
                 <p><strong>Availability:</strong> ${toolData.availability}</p>
             `;
 
-            // Function to update tool availability
-            async function updateToolAvailability(toolID, toolHolder, toolCondition, toolLocation) {
+            async function updateToolAvailability(formData) {
                 const url = 'https://masivintranet-1.onrender.com/check-in-tool';
-                const data = {
-                    tool_id: toolID,
-                    tool_holder: toolHolder,
-                    tool_condition: toolCondition,
-                    tool_location: toolLocation
-                };
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
+                        body: formData
                     });
                     if (!response.ok) {
                         const errorData = await response.json();
@@ -177,7 +154,6 @@
                 }
             }
 
-            // Set up video stream
             const video = document.getElementById('video');
             const canvas = document.getElementById('canvas');
             const photo = document.getElementById('photo');
@@ -193,7 +169,6 @@
                     alert('Error accessing webcam.');
                 });
 
-            // Capture photo
             document.getElementById('capture-photo').addEventListener('click', () => {
                 const context = canvas.getContext('2d');
                 canvas.width = video.videoWidth;
@@ -201,11 +176,10 @@
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const photoData = canvas.toDataURL('image/png');
                 photo.src = photoData;
-                photo.style.display = 'block'; // Show the captured photo
-                localStorage.setItem('photoData', photoData); // Save photo data to local storage
+                photo.style.display = 'block';
+                localStorage.setItem('photoData', photoData);
             });
 
-            // Confirm check-in
             document.getElementById('confirm-checkin').addEventListener('click', async () => {
                 const photoData = localStorage.getItem('photoData');
 
@@ -217,11 +191,6 @@
                 const toolLocation = document.getElementById('tool-location').value;
                 if (!toolLocation) {
                     alert('Please select the tool location.');
-                    return;
-                }
-
-                if (toolLocation !== toolData.location) {
-                    alert('Selected location does not match the tool\'s location. Please check the location and try again.');
                     return;
                 }
 
@@ -242,13 +211,31 @@
                     return;
                 }
 
-                const success = await updateToolAvailability(toolData._id.$oid || toolData._id, toolHolder, toolCondition, toolLocation);
+                const formData = new FormData();
+                formData.append('photo', dataURItoBlob(photoData));
+                formData.append('tool_id', toolData._id.$oid || toolData._id);
+                formData.append('tool_holder', toolHolder);
+                formData.append('tool_location', toolLocation);
+                formData.append('tool_condition', toolCondition);
+
+                const success = await updateToolAvailability(formData);
                 if (success) {
-                    localStorage.removeItem('photoData'); // Clear photo data after successful check-in
+                    localStorage.removeItem('photoData');
                     window.location.href = 'home.html';
                 }
             });
         });
+
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mimeString });
+        }
     </script>
 </body>
 

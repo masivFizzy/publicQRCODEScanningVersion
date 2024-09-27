@@ -31,6 +31,7 @@
                         <a href="getUsers.html">All Users</a>
                         <a href="addCustomer.html">Add Customer</a>
                         <a href="getCustomer.html">All Customers</a>
+                        <a href="getTransactions.html">All Tool Transactions</a>
                     </div>
                 </div>
                 <button id="auth-btn" title="Admin Access" onclick="handleAuth()">Logout</button>
@@ -139,7 +140,7 @@
             const newRole = document.getElementById('new-role').value;
 
             try {
-                const response = await fetch(`http://127.0.0.1:5000/users/${currentUser}`, {
+                const response = await fetch(`https://masivintranet-1.onrender.com/users/${currentUser}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -163,7 +164,7 @@
             const confirmation = confirm(`Are you sure you want to delete user "${username}"?`);
             if (confirmation) {
                 try {
-                    const response = await fetch(`http://127.0.0.1:5000/users/${username}`, {
+                    const response = await fetch(`https://masivintranet-1.onrender.com/users/${username}`, {
                         method: 'DELETE',
                     });
 

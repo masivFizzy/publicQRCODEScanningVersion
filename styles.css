@@ -340,3 +340,9 @@ button:hover {
 .play-button:hover {
     background-color: #0056b3;
 }
+
+.transaction-photo {
+    max-width: 200px;
+    height: auto;
+    margin-top: 10px;
+}
