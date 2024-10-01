@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Customers</title>
+    <title>All Studios</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 </head>
@@ -41,7 +41,7 @@
     </header>
 
     <div class="container">
-        <h1>All Current Customers</h1>
+        <h1>All Current Studios</h1>
         <div class="search-container">
             <form id="search-form">
                 <input type="text" id="search-input" placeholder="Search.." name="search">
@@ -49,10 +49,10 @@
             </form>
         </div>
         
-        <div id="loading-message">Loading customers...</div>
-        <div id="error-message" style="display:none;">Error loading customers.</div>
+        <div id="loading-message">Loading studios...</div>
+        <div id="error-message" style="display:none;">Error loading studios.</div>
         
-        <table id="cust-table">
+        <table id="studio-table">
             <thead>
                 <!-- Header will be populated by JavaScript -->
             </thead>
@@ -63,42 +63,13 @@
     </div>
 
     <script>
-
-        // Redirect to login page if not logged in
-        function checkLogin() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            if (!isLoggedIn) {
-                window.location.href = 'index.html'; // Redirect to login page
-            } else {
-                checkAdminRole(); // Check for admin role if logged in
-            }
-        }
-
-        function checkAdminRole() {
-            const userRole = localStorage.getItem('userrole');
-            if (userRole !== 'admin') {
-                window.location.href = 'home.html'; // Redirect non-admin users to home
-            }
-        }
-
-        function handleAuth() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            if (isLoggedIn) {
-                localStorage.removeItem('isLoggedIn');
-                localStorage.removeItem('username');
-                window.location.href = 'index.html'; // Redirect to login page
-            } else {
-                window.location.href = 'index.html'; // Redirect to login page
-            }
-        }
-
-        const headers = ["id", "first_name", "last_name", "email", "phone", "company", "business_divisions"];
-        let custDoc = [];
+        const headers = ["Studio", "First", "Last", "Email_1", "Location"];
+        let studioDoc = [];
 
         function renderTable(data) {
-            const custTable = document.getElementById('cust-table');
-            const thead = custTable.querySelector('thead');
-            const tbody = custTable.querySelector('tbody');
+            const studioTable = document.getElementById('studio-table');
+            const thead = studioTable.querySelector('thead');
+            const tbody = studioTable.querySelector('tbody');
 
             // Clear previous content
             thead.innerHTML = '';
@@ -117,43 +88,9 @@
             data.forEach(doc => {
                 const valueRow = document.createElement('tr');
                 
-                headers.forEach((header, index) => {
+                headers.forEach(header => {
                     const td = document.createElement('td');
-                    if (header === "id") {
-                        const idContainer = document.createElement('div');
-                        idContainer.style.display = 'flex';
-                        idContainer.style.alignItems = 'center';
-
-                        const idText = document.createElement('span');
-                        idText.textContent = "hidden"; // Default to "hidden"
-                        idText.style.cursor = 'pointer'; // Change cursor to pointer
-                        idText.addEventListener('click', () => {
-                            // Toggle between "hidden" and the actual ID
-                            if (idText.textContent === "hidden") {
-                                idText.textContent = doc['id']; // Show ID
-                            } else {
-                                idText.textContent = "hidden"; // Hide ID
-                            }
-                        });
-
-                        const copyButton = document.createElement('button');
-                        copyButton.textContent = "Copy";
-                        copyButton.style.marginLeft = '10px';
-                        copyButton.addEventListener('click', (event) => {
-                            event.stopPropagation(); // Prevent triggering the id toggle
-                            navigator.clipboard.writeText(doc['id']).then(() => {
-                                alert('ID copied to clipboard!');
-                            }).catch(err => {
-                                console.error('Error copying ID:', err);
-                            });
-                        });
-
-                        idContainer.appendChild(idText);
-                        idContainer.appendChild(copyButton);
-                        td.appendChild(idContainer);
-                    } else {
-                        td.textContent = doc[header] || 'N/A'; // Use 'N/A' if the key is missing
-                    }
+                    td.textContent = doc[header] || 'N/A'; // Use 'N/A' if the key is missing
                     valueRow.appendChild(td);
                 });
 
@@ -161,10 +98,10 @@
             });
         }
 
-        function fetchCustomers() {
+        function fetchStudios() {
             document.getElementById('loading-message').style.display = 'block';
 
-            fetch('https://masivintranet-1.onrender.com/customers', {
+            fetch('https://masivintranet-1.onrender.com/studios', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -177,23 +114,23 @@
                 return response.json();
             })
             .then(data => {
-                custDoc = data;
-                renderTable(custDoc);
+                studioDoc = data;
+                renderTable(studioDoc);
                 document.getElementById('loading-message').style.display = 'none';
             })
             .catch(error => {
-                console.error('Error fetching documents:', error);
+                console.error('Error fetching studios:', error);
                 document.getElementById('loading-message').style.display = 'none';
                 document.getElementById('error-message').style.display = 'block';
             });
         }
 
-        fetchCustomers();
+        fetchStudios();
 
         document.getElementById('search-form').addEventListener('submit', function (event) {
             event.preventDefault();
             const query = document.getElementById('search-input').value.toLowerCase();
-            const filteredDocs = custDoc.filter(doc => {
+            const filteredDocs = studioDoc.filter(doc => {
                 return JSON.stringify(doc).toLowerCase().includes(query);
             });
             renderTable(filteredDocs);
@@ -201,11 +138,12 @@
 
         document.getElementById('search-input').addEventListener('input', function () {
             const query = this.value.toLowerCase();
-            const filteredDocs = custDoc.filter(doc => {
+            const filteredDocs = studioDoc.filter(doc => {
                 return JSON.stringify(doc).toLowerCase().includes(query);
             });
             renderTable(filteredDocs);
         });
+
         checkLogin();
     </script>
 </body>
