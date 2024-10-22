@@ -96,6 +96,14 @@
             }
         }
 
+        // Call the API every 15 seconds
+        setInterval(() => {
+            fetch('https://masivintranet-1.onrender.com')
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .catch(error => console.error('Error:', error));
+        }, 15000); // 15000 milliseconds = 15 seconds
+
         // Initialize the auth button state
         updateAuthButton();
     </script>
