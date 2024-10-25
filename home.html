@@ -10,13 +10,6 @@
 </head>
 
 <body>
-    <script type="module">
-        import Chatbot from "https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js"
-        Chatbot.init({
-            chatflowid: "3ae86816-fdc1-4911-bc6a-df39144e59ea",
-            apiHost: "https://5885-207-148-176-160.ngrok-free.app",
-        })
-    </script>
     <header>
         <div class="header-container">
             <div class="logo">
@@ -32,21 +25,20 @@
                         <a href="scanout.html">Check-Out</a>
                         <a href="scanin.html">Check-In</a>
                         <a href="tutorial.html">Tutorial Video</a>
-                        <div id="admin-links"></div> <!-- Placeholder for admin links -->
+                        <div id="admin-links"></div>
                     </div>
                 </div>
                 <button id="auth-btn" title="Admin Access" onclick="handleAuth()">Logout</button>
             </div>
         </div>
     </header>
-    
+
     <div class="block-container">
         <div id="home" class="block"><a href="getTools.html">All Tools</a></div>
         <div id="check-out" class="block"><a href="scanout.html">Check-Out</a></div>
         <div id="check-in" class="block"><a href="scanin.html">Check-In</a></div>
         <div id="tutorial" class="block"><a href="tutorial.html">Tutorial Video</a></div>
 
-        <!-- Admin Blocks (initially hidden) -->
         <div id="admin-blocks" class="admin-blocks" style="display: none;">
             <div class="block"><a href="addTool.html">Add Tool</a></div>
             <div class="block"><a href="addTutorial.html">Add Tutorial</a></div>
@@ -59,8 +51,114 @@
         </div>
     </div>
 
+    <button id="toggleChatbot" aria-label="Toggle Chatbot"></button>
+
+    <script type="module">
+        import Chatbot from "https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js";
+
+        const chatbots = [
+            {
+                chatflowid: "3ae86816-fdc1-4911-bc6a-df39144e59ea",
+                title: "Architect CHOP",
+            },
+            {
+                chatflowid: "9b064288-b1dd-471d-baa9-541982423379",
+                title: "Building And Energy Code",
+            }
+        ];
+
+        let currentChatbotIndex = 0;
+
+        function initChatbot() {
+            const { chatflowid, title } = chatbots[currentChatbotIndex];
+            Chatbot.init({
+                chatflowid,
+                apiHost: "https://5885-207-148-176-160.ngrok-free.app",
+                chatflowConfig: {},
+                theme: {
+                    button: {
+                        backgroundColor: "#3B81F6",
+                        right: 20,
+                        bottom: 20,
+                        size: 48,
+                        dragAndDrop: true,
+                        iconColor: "white",
+                        customIconSrc: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/svg/google-messages.svg",
+                        autoWindowOpen: {
+                            autoOpen: true,
+                            openDelay: 2,
+                            autoOpenOnMobile: false,
+                        },
+                    },
+                    tooltip: {
+                        showTooltip: true,
+                        tooltipMessage: 'Hi There 👋!',
+                        tooltipBackgroundColor: 'black',
+                        tooltipTextColor: 'white',
+                        tooltipFontSize: 16,
+                    },
+                    chatWindow: {
+                        showTitle: true,
+                        title,
+                        titleAvatarSrc: 'https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/svg/google-messages.svg',
+                        showAgentMessages: true,
+                        welcomeMessage: 'Hello! This is custom welcome message',
+                        errorMessage: 'This is a custom error message',
+                        backgroundColor: "#ffffff",
+                        height: 700,
+                        width: 400,
+                        fontSize: 16,
+                        starterPromptFontSize: 15,
+                        clearChatOnReload: false,
+                        botMessage: {
+                            backgroundColor: "#f7f8ff",
+                            textColor: "#303235",
+                            showAvatar: true,
+                            avatarSrc: "https://raw.githubusercontent.com/zahidkhawaja/langchain-chat-nextjs/main/public/parroticon.png",
+                        },
+                        userMessage: {
+                            backgroundColor: "#3B81F6",
+                            textColor: "#ffffff",
+                            showAvatar: true,
+                            avatarSrc: "https://raw.githubusercontent.com/zahidkhawaja/langchain-chat-nextjs/main/public/usericon.png",
+                        },
+                        textInput: {
+                            placeholder: 'Type your question',
+                            backgroundColor: '#ffffff',
+                            textColor: '#303235',
+                            sendButtonColor: '#3B81F6',
+                            maxChars: 50,
+                            maxCharsWarningMessage: 'You exceeded the characters limit. Please input less than 50 characters.',
+                            autoFocus: true,
+                            sendMessageSound: true,
+                            receiveMessageSound: true,
+                        },
+                        feedback: {
+                            color: '#303235',
+                        },
+                        footer: {
+                            textColor: '#303235',
+                            text: 'Powered by',
+                            company: 'Flowise',
+                            companyLink: 'https://flowiseai.com',
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('toggleChatbot').textContent = `Switch to ${chatbots[(currentChatbotIndex + 1) % chatbots.length].title}`;
+        }
+
+        document.getElementById('toggleChatbot').addEventListener('click', () => {
+            currentChatbotIndex = (currentChatbotIndex + 1) % chatbots.length;
+            initChatbot();
+        });
+
+        // Initialize the first chatbot on page load
+        initChatbot();
+    </script>
+
     <script>
-        // Redirect to login page if not logged in
         function checkLogin() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             if (!isLoggedIn) {
@@ -77,7 +175,7 @@
                     <a href="addTool.html">Add Tool</a>
                     <a href="addTutorial.html">Add Tutorial</a>
                     <a href="addUser.html">Add User</a>
-                    <a href="getUsers.html">All User</a>
+                    <a href="getUsers.html">All Users</a>
                     <a href="addCustomer.html">Add Customer</a>
                     <a href="getCustomer.html">All Customers</a>
                     <a href="getStudio.html">All Studio</a>
