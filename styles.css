@@ -355,3 +355,18 @@ button:hover {
     text-align: center;
     margin: 10px 0;
 }
+
+#toggleChatbot {
+    position: fixed; 
+    right: 4vw; 
+    bottom: 20px; 
+    border-radius: 5px; 
+    padding: 10px 15px; 
+    cursor: pointer; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
+    z-index: 1000;
+}
+
+#toggleChatbot:hover {
+    background-color: #2a66b3;
+}
